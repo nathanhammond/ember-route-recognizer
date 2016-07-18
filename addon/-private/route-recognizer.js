@@ -37,12 +37,17 @@ export default class RouteRecognizer {
 
     // Get the list of segments.
     // Remove leading and trailing slashes as they're not important.
-    // FIXME: How should this handle leading slashes?
     // FIXME: How should this handle adjacent slashes?
-    // FIXME: How should this handle trailing slashes?
     var segments = path.split('/');
+
+    // FIXME: How should this handle leading slashes?
     if (segments[0] === '') {
       segments.shift();
+    }
+
+    // FIXME: How should this handle trailing slashes?
+    if (segments[segments.length - 1] === '') {
+      segments.pop();
     }
 
     // We're walking a modified radix trie with an NFA-style transition function.
@@ -54,13 +59,16 @@ export default class RouteRecognizer {
     // In that case the segment is `undefined`.
     // The transition function understands what to do with this.
     // Consume the path until we either know that there will be
+    // no matches or until we exhaust the segments.
+    var segment;
     do {
-      nextSet = transition(nextSet, segments.shift());
-    } while (nextSet.length && segments.length);
+      segment = segments.shift();
+      nextSet = transition(nextSet, segment);
+    } while (nextSet.length && segment !== undefined);
 
     // FIXME: UnrecognizedURLError.
     if (nextSet.length === 0) {
-      throw new Error();
+      throw new Error("UnrecognizedURLError");
     }
 
     let solution = nextSet.sort(function(a,b) {
