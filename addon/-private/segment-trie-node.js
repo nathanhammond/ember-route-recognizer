@@ -47,6 +47,14 @@ class SegmentTrieNode {
     this.value = value;
   }
 
+  get regex() {
+    return '';
+  }
+
+  output() {
+    return '';
+  }
+
   append(node) {
     return node.appendTo(this);
   }
@@ -91,6 +99,14 @@ class StaticSegment extends SegmentTrieNode {
   constructor() {
     super(...arguments);
     this.type = 'static';
+  }
+
+  get regex() {
+    return this.value;
+  }
+
+  output() {
+    return '/' + this.value;
   }
 
   appendTo(parentNode) {
@@ -152,6 +168,14 @@ class DynamicSegment extends SegmentTrieNode {
     this.type = 'dynamic';
   }
 
+  get regex() {
+    return '([^/]+)';
+  }
+
+  output(params) {
+    return '/' + params[this.value];
+  }
+
   appendTo(parentNode) {
     this.parent = parentNode;
     let haystack = this.parent.children.dynamicSegments;
@@ -180,6 +204,14 @@ class GlobNode extends SegmentTrieNode {
     // Glob nodes maintain a circular reference to themselves.
     // This is so they may consume multiple segments.
     this.children.globNodes = [ this ];
+  }
+
+  get regex() {
+    return '(.+)';
+  }
+
+  output(params) {
+    return '/' + params[this.value];
   }
 
   appendTo(parentNode) {
