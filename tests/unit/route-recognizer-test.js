@@ -4,7 +4,13 @@ import { module, test } from 'qunit';
 module('Unit | RouteRecognizer');
 
 test('RouteRecognizer#recognize', function(assert) {
-  var recognizer = new RouteRecognizer();
-  recognizer.recognize('/');
   assert.ok(true);
+});
+
+test('RouteRecognizer#map', function(assert) {
+  var recognizer = new RouteRecognizer();
+  recognizer.map(function(match) {
+    match('/helloworld').to('helloworld');
+  });
+  assert.ok(recognizer.recognize('/helloworld'), 'Achieved Hello World!');
 });

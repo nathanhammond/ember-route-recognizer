@@ -1,9 +1,11 @@
-import { StaticSegment, EpsilonSegment, DynamicSegment, GlobNode } from './segment-trie-node';
+import { matcher, StaticSegment, EpsilonSegment, DynamicSegment, GlobNode } from './segment-trie-node';
+// import RecognizeResults from './recognize-results';
+import { bind } from './polyfills';
 import transition from './nfa-transition';
 
 export default class RouteRecognizer {
   constructor() {
-    this.rootState = new EpsilonSegment();
+    this.rootState = new EpsilonSegment(this);
   }
 
   add() {
@@ -16,7 +18,11 @@ export default class RouteRecognizer {
   hasRoute() {}
   generate() {}
   generateQueryString() {}
-  map() {}
+
+  map(callback/*, addRouteCallback*/) {
+    callback(bind(matcher, this.rootState));
+  }
+
   parseQueryString() {}
 
   recognize(path) {

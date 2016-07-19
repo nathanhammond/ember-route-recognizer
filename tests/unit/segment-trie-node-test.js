@@ -14,9 +14,9 @@ test('SegmentTrieNode#equivalent', function(assert) {
 });
 
 test('StaticSegment#append', function(assert) {
-  let parent = new StaticSegment('parent');
-  let child1 = new StaticSegment('child');
-  let child2 = new StaticSegment('child');
+  let parent = new StaticSegment({}, 'parent');
+  let child1 = new StaticSegment({}, 'child');
+  let child2 = new StaticSegment({}, 'child');
   let append1 = parent.append(child1);
   let append2 = parent.append(child2);
 
@@ -28,9 +28,9 @@ test('StaticSegment#append', function(assert) {
 });
 
 test('StaticSegment#appendTo', function(assert) {
-  let parent = new StaticSegment('parent');
-  let child1 = new StaticSegment('child');
-  let child2 = new StaticSegment('child');
+  let parent = new StaticSegment({}, 'parent');
+  let child1 = new StaticSegment({}, 'child');
+  let child2 = new StaticSegment({}, 'child');
   let append1 = child1.appendTo(parent);
   let append2 = child2.appendTo(parent);
 
@@ -42,9 +42,9 @@ test('StaticSegment#appendTo', function(assert) {
 });
 
 test('EpsilonSegment#append', function(assert) {
-  let parent = new StaticSegment('parent');
-  let child1 = new EpsilonSegment();
-  let child2 = new EpsilonSegment();
+  let parent = new StaticSegment({}, 'parent');
+  let child1 = new EpsilonSegment({});
+  let child2 = new EpsilonSegment({});
   let append1 = parent.append(child1);
   let append2 = parent.append(child2);
 
@@ -56,9 +56,9 @@ test('EpsilonSegment#append', function(assert) {
 });
 
 test('EpsilonSegment#appendTo', function(assert) {
-  let parent = new StaticSegment('parent');
-  let child1 = new EpsilonSegment();
-  let child2 = new EpsilonSegment();
+  let parent = new StaticSegment({}, 'parent');
+  let child1 = new EpsilonSegment({});
+  let child2 = new EpsilonSegment({});
   let append1 = child1.appendTo(parent);
   let append2 = child2.appendTo(parent);
 
@@ -70,9 +70,9 @@ test('EpsilonSegment#appendTo', function(assert) {
 });
 
 test('DynamicSegment#append', function(assert) {
-  let parent = new StaticSegment('parent');
-  let child1 = new DynamicSegment('child');
-  let child2 = new DynamicSegment('child');
+  let parent = new StaticSegment({}, 'parent');
+  let child1 = new DynamicSegment({}, 'child');
+  let child2 = new DynamicSegment({}, 'child');
   let append1 = parent.append(child1);
   let append2 = parent.append(child2);
 
@@ -84,9 +84,9 @@ test('DynamicSegment#append', function(assert) {
 });
 
 test('DynamicSegment#appendTo', function(assert) {
-  let parent = new StaticSegment('parent');
-  let child1 = new DynamicSegment('child');
-  let child2 = new DynamicSegment('child');
+  let parent = new StaticSegment({}, 'parent');
+  let child1 = new DynamicSegment({}, 'child');
+  let child2 = new DynamicSegment({}, 'child');
   let append1 = child1.appendTo(parent);
   let append2 = child2.appendTo(parent);
 
@@ -98,14 +98,14 @@ test('DynamicSegment#appendTo', function(assert) {
 });
 
 test('new GlobNode()', function(assert) {
-  let globNode = new GlobNode('globby');
+  let globNode = new GlobNode({}, 'globby');
   assert.ok(globNode.children.globNodes[0] === globNode, "Maintains a circular reference to itself.");
 });
 
 test('GlobNode#append', function(assert) {
-  let parent = new StaticSegment('parent');
-  let child1 = new GlobNode('child');
-  let child2 = new GlobNode('child');
+  let parent = new StaticSegment({}, 'parent');
+  let child1 = new GlobNode({}, 'child');
+  let child2 = new GlobNode({}, 'child');
   let append1 = parent.append(child1);
   let append2 = parent.append(child2);
 
@@ -117,9 +117,9 @@ test('GlobNode#append', function(assert) {
 });
 
 test('GlobNode#appendTo', function(assert) {
-  let parent = new StaticSegment('parent');
-  let child1 = new GlobNode('child');
-  let child2 = new GlobNode('child');
+  let parent = new StaticSegment({}, 'parent');
+  let child1 = new GlobNode({}, 'child');
+  let child2 = new GlobNode({}, 'child');
   let append1 = child1.appendTo(parent);
   let append2 = child2.appendTo(parent);
 

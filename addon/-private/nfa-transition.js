@@ -32,7 +32,7 @@ export default function NFATransition(set, segment) {
       nextSet = nextSet.concat(set[i].children.dynamicSegments);
 
       // 3. All glob segments.
-      nextSet = nextSet.concat(set[i].children.globSegments);
+      nextSet = nextSet.concat(set[i].children.globNodes);
     }
 
     // 4. All "recursive" epsilon segments of this built-up nextSet.
