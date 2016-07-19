@@ -1,13 +1,12 @@
-/* globals RouteRecognizer,QUnit */
-
-import RouteRecognizer from 'route-recognizer';
+import RouteRecognizer from 'ember-route-recognizer/-private/route-recognizer';
+import { module, test } from 'qunit';
 
 var router;
 
-function resultsMatch(results, array, queryParams) {
-  deepEqual(results.slice(), array);
+function resultsMatch(assert, results, array, queryParams) {
+  assert.deepEqual(results.slice(), array);
   if (queryParams) {
-    deepEqual(queryParams, results.queryParams);
+    assert.deepEqual(queryParams, results.queryParams);
   }
 }
 
@@ -17,36 +16,36 @@ module("The match DSL", {
   }
 });
 
-var matchesRoute = function(path, expected, queryParams) {
+var matchesRoute = function(assert, path, expected, queryParams) {
   var actual = router.recognize(path);
-  resultsMatch(actual, expected, queryParams);
+  resultsMatch(assert, actual, expected, queryParams);
 };
 
-test("supports multiple calls to match", function() {
+test("supports multiple calls to match", function(assert) {
   router.map(function(match) {
     match("/posts/new").to("newPost");
     match("/posts/:id").to("showPost");
     match("/posts/edit").to("editPost");
   });
 
-  matchesRoute("/posts/new", [{ handler: "newPost", params: {}, isDynamic: false }]);
-  matchesRoute("/posts/1", [{ handler: "showPost", params: { id: "1" }, isDynamic: true }]);
-  matchesRoute("/posts/edit", [{ handler: "editPost", params: {}, isDynamic: false }]);
+  matchesRoute(assert, "/posts/new", [{ handler: "newPost", params: {}, isDynamic: false }]);
+  matchesRoute(assert, "/posts/1", [{ handler: "showPost", params: { id: "1" }, isDynamic: true }]);
+  matchesRoute(assert, "/posts/edit", [{ handler: "editPost", params: {}, isDynamic: false }]);
 });
 
-test("supports multiple calls to match with query params", function() {
+test("supports multiple calls to match with query params", function(assert) {
   router.map(function(match) {
     match("/posts/new").to("newPost");
     match("/posts/:id").to("showPost");
     match("/posts/edit").to("editPost");
   });
 
-  matchesRoute("/posts/new?foo=1&bar=2", [{ handler: "newPost", params: {}, isDynamic: false }], {foo: '1', bar: '2'});
-  matchesRoute("/posts/1?baz=3", [{ handler: "showPost", params: { id: "1" }, isDynamic: true }], {baz: '3'});
-  matchesRoute("/posts/edit", [{ handler: "editPost", params: {}, isDynamic: false }], {});
+  matchesRoute(assert, "/posts/new?foo=1&bar=2", [{ handler: "newPost", params: {}, isDynamic: false }], {foo: '1', bar: '2'});
+  matchesRoute(assert, "/posts/1?baz=3", [{ handler: "showPost", params: { id: "1" }, isDynamic: true }], {baz: '3'});
+  matchesRoute(assert, "/posts/edit", [{ handler: "editPost", params: {}, isDynamic: false }], {});
 });
 
-test("supports nested match", function() {
+test("supports nested match", function(assert) {
   router.map(function(match) {
     match("/posts", function(match) {
       match("/new").to("newPost");
@@ -55,12 +54,12 @@ test("supports nested match", function() {
     });
   });
 
-  matchesRoute("/posts/new", [{ handler: "newPost", params: {}, isDynamic: false }]);
-  matchesRoute("/posts/1", [{ handler: "showPost", params: { id: "1" }, isDynamic: true }]);
-  matchesRoute("/posts/edit", [{ handler: "editPost", params: {}, isDynamic: false }]);
+  matchesRoute(assert, "/posts/new", [{ handler: "newPost", params: {}, isDynamic: false }]);
+  matchesRoute(assert, "/posts/1", [{ handler: "showPost", params: { id: "1" }, isDynamic: true }]);
+  matchesRoute(assert, "/posts/edit", [{ handler: "editPost", params: {}, isDynamic: false }]);
 });
 
-test("supports nested match with query params", function() {
+test("supports nested match with query params", function(assert) {
   router.map(function(match) {
     match("/posts", function(match) {
       match("/new").to("newPost");
@@ -69,13 +68,13 @@ test("supports nested match with query params", function() {
     });
   });
 
-  matchesRoute("/posts/new?foo=1&bar=2", [{ handler: "newPost", params: {}, isDynamic: false }], {foo: '1', bar: '2'});
-  matchesRoute("/posts/1?baz=3", [{ handler: "showPost", params: { id: "1" }, isDynamic: true }], {baz: '3'});
-  matchesRoute("/posts/edit", [{ handler: "editPost", params: {}, isDynamic: false }], {});
+  matchesRoute(assert, "/posts/new?foo=1&bar=2", [{ handler: "newPost", params: {}, isDynamic: false }], {foo: '1', bar: '2'});
+  matchesRoute(assert, "/posts/1?baz=3", [{ handler: "showPost", params: { id: "1" }, isDynamic: true }], {baz: '3'});
+  matchesRoute(assert, "/posts/edit", [{ handler: "editPost", params: {}, isDynamic: false }], {});
 });
 
-test("not passing a function with `match` as a parameter raises", function() {
-  QUnit.throws(function() {
+test("not passing a function with `match` as a parameter raises", function(assert) {
+  assert.throws(function() {
     router.map(function(match) {
       match("/posts").to("posts", function() {
 
@@ -84,7 +83,7 @@ test("not passing a function with `match` as a parameter raises", function() {
   });
 });
 
-test("supports nested handlers", function() {
+test("supports nested handlers", function(assert) {
   router.map(function(match) {
     match("/posts").to("posts", function(match) {
       match("/new").to("newPost");
@@ -93,12 +92,12 @@ test("supports nested handlers", function() {
     });
   });
 
-  matchesRoute("/posts/new", [{ handler: "posts", params: {}, isDynamic: false }, { handler: "newPost", params: {}, isDynamic: false }]);
-  matchesRoute("/posts/1", [{ handler: "posts", params: {}, isDynamic: false }, { handler: "showPost", params: { id: "1" }, isDynamic: true }]);
-  matchesRoute("/posts/edit", [{ handler: "posts", params: {}, isDynamic: false }, { handler: "editPost", params: {}, isDynamic: false }]);
+  matchesRoute(assert, "/posts/new", [{ handler: "posts", params: {}, isDynamic: false }, { handler: "newPost", params: {}, isDynamic: false }]);
+  matchesRoute(assert, "/posts/1", [{ handler: "posts", params: {}, isDynamic: false }, { handler: "showPost", params: { id: "1" }, isDynamic: true }]);
+  matchesRoute(assert, "/posts/edit", [{ handler: "posts", params: {}, isDynamic: false }, { handler: "editPost", params: {}, isDynamic: false }]);
 });
 
-test("supports deeply nested handlers", function() {
+test("supports deeply nested handlers", function(assert) {
   router.map(function(match) {
     match("/posts").to("posts", function(match) {
       match("/new").to("newPost");
@@ -110,14 +109,14 @@ test("supports deeply nested handlers", function() {
     });
   });
 
-  matchesRoute("/posts/new", [{ handler: "posts", params: {}, isDynamic: false }, { handler: "newPost", params: {}, isDynamic: false }]);
-  matchesRoute("/posts/1/index", [{ handler: "posts", params: {}, isDynamic: false }, { handler: "showPost", params: { id: "1" }, isDynamic: true }, { handler: "postIndex", params: {}, isDynamic: false }]);
-  matchesRoute("/posts/1/comments", [{ handler: "posts", params: {}, isDynamic: false }, { handler: "showPost", params: { id: "1" }, isDynamic: true }, { handler: "postComments", params: {}, isDynamic: false }]);
-  matchesRoute("/posts/ne/comments", [{ handler: "posts", params: {}, isDynamic: false }, { handler: "showPost", params: { id: "ne" }, isDynamic: true }, { handler: "postComments", params: {}, isDynamic: false }]);
-  matchesRoute("/posts/edit", [{ handler: "posts", params: {}, isDynamic: false }, { handler: "editPost", params: {}, isDynamic: false }]);
+  matchesRoute(assert, "/posts/new", [{ handler: "posts", params: {}, isDynamic: false }, { handler: "newPost", params: {}, isDynamic: false }]);
+  matchesRoute(assert, "/posts/1/index", [{ handler: "posts", params: {}, isDynamic: false }, { handler: "showPost", params: { id: "1" }, isDynamic: true }, { handler: "postIndex", params: {}, isDynamic: false }]);
+  matchesRoute(assert, "/posts/1/comments", [{ handler: "posts", params: {}, isDynamic: false }, { handler: "showPost", params: { id: "1" }, isDynamic: true }, { handler: "postComments", params: {}, isDynamic: false }]);
+  matchesRoute(assert, "/posts/ne/comments", [{ handler: "posts", params: {}, isDynamic: false }, { handler: "showPost", params: { id: "ne" }, isDynamic: true }, { handler: "postComments", params: {}, isDynamic: false }]);
+  matchesRoute(assert, "/posts/edit", [{ handler: "posts", params: {}, isDynamic: false }, { handler: "editPost", params: {}, isDynamic: false }]);
 });
 
-test("supports index-style routes", function() {
+test("supports index-style routes", function(assert) {
   router.map(function(match) {
     match("/posts").to("posts", function(match) {
       match("/new").to("newPost");
@@ -129,21 +128,21 @@ test("supports index-style routes", function() {
     });
   });
 
-  matchesRoute("/posts/new", [{ handler: "posts", params: {}, isDynamic: false }, { handler: "newPost", params: {}, isDynamic: false }]);
-  matchesRoute("/posts/1", [{ handler: "posts", params: {}, isDynamic: false }, { handler: "showPost", params: { id: "1" }, isDynamic: true }, { handler: "postIndex", params: {}, isDynamic: false }]);
-  matchesRoute("/posts/1/comments", [{ handler: "posts", params: {}, isDynamic: false }, { handler: "showPost", params: { id: "1" }, isDynamic: true }, { handler: "postComments", params: {}, isDynamic: false }]);
-  matchesRoute("/posts/edit", [{ handler: "posts", params: {}, isDynamic: false }, { handler: "editPost", params: {}, isDynamic: false }]);
+  matchesRoute(assert, "/posts/new", [{ handler: "posts", params: {}, isDynamic: false }, { handler: "newPost", params: {}, isDynamic: false }]);
+  matchesRoute(assert, "/posts/1", [{ handler: "posts", params: {}, isDynamic: false }, { handler: "showPost", params: { id: "1" }, isDynamic: true }, { handler: "postIndex", params: {}, isDynamic: false }]);
+  matchesRoute(assert, "/posts/1/comments", [{ handler: "posts", params: {}, isDynamic: false }, { handler: "showPost", params: { id: "1" }, isDynamic: true }, { handler: "postComments", params: {}, isDynamic: false }]);
+  matchesRoute(assert, "/posts/edit", [{ handler: "posts", params: {}, isDynamic: false }, { handler: "editPost", params: {}, isDynamic: false }]);
 });
 
-test("supports single `/` routes", function() {
+test("supports single `/` routes", function(assert) {
   router.map(function(match) {
     match("/").to("posts");
   });
 
-  matchesRoute("/", [{ handler: "posts", params: {}, isDynamic: false }]);
+  matchesRoute(assert, "/", [{ handler: "posts", params: {}, isDynamic: false }]);
 });
 
-test("supports star routes", function() {
+test("supports star routes", function(assert) {
   router.map(function(match) {
     match("/").to("posts");
     match("/*everything").to("404");
@@ -151,11 +150,11 @@ test("supports star routes", function() {
 
   //randomly generated strings
   ['w6PCXxJn20PCSievuP', 'v2y0gaByxHjHYJw0pVT1TeqbEJLllVq-3', 'DFCR4rm7XMbT6CPZq-d8AU7k', 'd3vYEg1AoYaPlM9QbOAxEK6u/H_S-PYH1aYtt'].forEach(function(r) {
-    matchesRoute("/" + r, [{ handler: "404", params: {everything: r}, isDynamic: true}]);
+    matchesRoute(assert, "/" + r, [{ handler: "404", params: {everything: r}, isDynamic: true}]);
   });
 });
 
-test("star route does not swallow trailing `/`", function() {
+test("star route does not swallow trailing `/`", function(assert) {
   var r;
 
   router.map(function(match) {
@@ -164,20 +163,20 @@ test("star route does not swallow trailing `/`", function() {
   });
 
   r = "folder1/folder2/folder3/";
-  matchesRoute("/" + r, [{ handler: "glob", params: {everything: r}, isDynamic: true}]);
+  matchesRoute(assert, "/" + r, [{ handler: "glob", params: {everything: r}, isDynamic: true}]);
 });
 
-test("support star route before other segment", function() {
+test("support star route before other segment", function(assert) {
   router.map(function(match) {
     match("/*everything/:extra").to("glob");
   });
 
   ["folder1/folder2/folder3//the-extra-stuff/", "folder1/folder2/folder3//the-extra-stuff"].forEach(function(r) {
-    matchesRoute("/" + r, [{ handler: "glob", params: {everything: "folder1/folder2/folder3/", extra: "the-extra-stuff"}, isDynamic: true}]);
+    matchesRoute(assert, "/" + r, [{ handler: "glob", params: {everything: "folder1/folder2/folder3/", extra: "the-extra-stuff"}, isDynamic: true}]);
   });
 });
 
-test("support nested star route", function() {
+test("support nested star route", function(assert) {
   router.map(function(match) {
     match("/*everything").to("glob", function(match){
       match("/:extra").to("extra");
@@ -185,16 +184,16 @@ test("support nested star route", function() {
   });
 
   ["folder1/folder2/folder3//the-extra-stuff/", "folder1/folder2/folder3//the-extra-stuff"].forEach(function(r) {
-    matchesRoute("/" + r, [{ handler: "glob", params: {everything: "folder1/folder2/folder3/"}, isDynamic: true}, { handler: "extra", params: {extra: "the-extra-stuff"}, isDynamic: true}]);
+    matchesRoute(assert, "/" + r, [{ handler: "glob", params: {everything: "folder1/folder2/folder3/"}, isDynamic: true}, { handler: "extra", params: {extra: "the-extra-stuff"}, isDynamic: true}]);
   });
 });
 
-test("calls a delegate whenever a new context is entered", function() {
+test("calls a delegate whenever a new context is entered", function(assert) {
   var passedArguments = [];
 
   router.delegate = {
     contextEntered: function(name, match) {
-      ok(match instanceof Function, "The match is a function");
+      assert.ok(match instanceof Function, "The match is a function");
       match("/").to("index");
       passedArguments.push(name);
     }
@@ -208,12 +207,12 @@ test("calls a delegate whenever a new context is entered", function() {
     });
   });
 
-  deepEqual(passedArguments, ["application", "posts"], "The entered contexts were passed to contextEntered");
+  assert.deepEqual(passedArguments, ["application", "posts"], "The entered contexts were passed to contextEntered");
 
-  matchesRoute("/posts", [{ handler: "application", params: {}, isDynamic: false }, { handler: "posts", params: {}, isDynamic: false }, { handler: "index", params: {}, isDynamic: false }]);
+  matchesRoute(assert, "/posts", [{ handler: "application", params: {}, isDynamic: false }, { handler: "posts", params: {}, isDynamic: false }, { handler: "index", params: {}, isDynamic: false }]);
 });
 
-test("delegate can change added routes", function() {
+test("delegate can change added routes", function(assert) {
   router.delegate = {
     willAddRoute: function(context, route) {
       if (!context) { return route; }
@@ -235,11 +234,11 @@ test("delegate can change added routes", function() {
     });
   });
 
-  matchesRoute("/posts", [{ handler: "application", params: {}, isDynamic: false }, { handler: "application.posts", params: {}, isDynamic: false }, { handler: "posts.index", params: {}, isDynamic: false }]);
-  matchesRoute("/posts/1", [{ handler: "application", params: {}, isDynamic: false }, { handler: "application.posts", params: {}, isDynamic: false }, { handler: "posts.post", params: { post_id: "1" }, isDynamic: true }]);
+  matchesRoute(assert, "/posts", [{ handler: "application", params: {}, isDynamic: false }, { handler: "application.posts", params: {}, isDynamic: false }, { handler: "posts.index", params: {}, isDynamic: false }]);
+  matchesRoute(assert, "/posts/1", [{ handler: "application", params: {}, isDynamic: false }, { handler: "application.posts", params: {}, isDynamic: false }, { handler: "posts.post", params: { post_id: "1" }, isDynamic: true }]);
 });
 
-test("supports add-route callback", function() {
+test("supports add-route callback", function(assert) {
 
   var called = false;
 
@@ -255,6 +254,6 @@ test("supports add-route callback", function() {
     called = true;
   });
 
-  matchesRoute("/posts/new", [{ handler: "newPost", params: {}, isDynamic: false }]);
-  ok(called, "The add-route callback was called.");
+  matchesRoute(assert, "/posts/new", [{ handler: "newPost", params: {}, isDynamic: false }]);
+  assert.ok(called, "The add-route callback was called.");
 });

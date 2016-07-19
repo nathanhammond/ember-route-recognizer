@@ -1,23 +1,22 @@
-/* globals QUnit */
-
-import RouteRecognizer from 'route-recognizer';
+import RouteRecognizer from 'ember-route-recognizer/-private/route-recognizer';
+import { module, test } from 'qunit';
 
 module("Route Recognition");
 
-function resultsMatch(results, array, queryParams) {
-  deepEqual(results.slice(), array);
+function resultsMatch(assert, results, array, queryParams) {
+  assert.deepEqual(results.slice(), array);
   if (queryParams) {
-    deepEqual(queryParams, results.queryParams);
+    assert.deepEqual(queryParams, results.queryParams);
   }
 }
 
-test("A simple route recognizes", function() {
+test("A simple route recognizes", function(assert) {
   var handler = {};
   var router = new RouteRecognizer();
   router.add([{ path: "/foo/bar", handler: handler }]);
 
-  resultsMatch(router.recognize("/foo/bar"), [{ handler: handler, params: {}, isDynamic: false }]);
-  equal(router.recognize("/foo/baz"), null);
+  resultsMatch(assert, router.recognize("/foo/bar"), [{ handler: handler, params: {}, isDynamic: false }]);
+  assert.equal(router.recognize("/foo/baz"), null);
 });
 
 var slashStaticExpectations = [{
@@ -97,130 +96,130 @@ var staticExpectations = [].concat(slashStaticExpectations,
                                    encodedCharStaticExpectations);
 
 staticExpectations.forEach(function(expectation) {
-  var routes, path, matches, nonmatches;
+  var routes, matches, nonmatches;
   routes = expectation.routes || [expectation.route];
   matches = expectation.matches;
   nonmatches = expectation.nonmatches || [];
 
   routes.forEach(function(route) {
     matches.forEach(function(match) {
-      test("Static route '" + route + "' recognizes path '" + match + "'", function() {
+      test("Static route '" + route + "' recognizes path '" + match + "'", function(assert) {
         var handler = {};
         var router = new RouteRecognizer();
         router.add([{ path: route, handler: handler }]);
-        resultsMatch(router.recognize(match), [{ handler: handler, params: {}, isDynamic: false }]);
+        resultsMatch(assert, router.recognize(match), [{ handler: handler, params: {}, isDynamic: false }]);
       });
     });
 
     if (nonmatches.length) {
       nonmatches.forEach(function(nonmatch) {
-        test("Static route '" + route + "' does not recognize path '" + nonmatch + "'", function() {
+        test("Static route '" + route + "' does not recognize path '" + nonmatch + "'", function(assert) {
           var handler = {};
           var router = new RouteRecognizer();
           router.add([{ path: route, handler: handler }]);
-          equal(router.recognize(nonmatch), null);
+          assert.equal(router.recognize(nonmatch), null);
         });
       });
     }
   });
 });
 
-test("A simple route with query params recognizes", function() {
+test("A simple route with query params recognizes", function(assert) {
   var handler = {};
   var router = new RouteRecognizer();
   router.add([{ path: "/foo/bar", handler: handler}]);
 
-  resultsMatch(router.recognize("/foo/bar?sort=date&other=something"), [{ handler: handler, params: {}, isDynamic: false }], { sort: 'date', other: 'something' });
-  resultsMatch(router.recognize("/foo/bar?other=something"), [{ handler: handler, params: {}, isDynamic: false }], { other: 'something' });
+  resultsMatch(assert, router.recognize("/foo/bar?sort=date&other=something"), [{ handler: handler, params: {}, isDynamic: false }], { sort: 'date', other: 'something' });
+  resultsMatch(assert, router.recognize("/foo/bar?other=something"), [{ handler: handler, params: {}, isDynamic: false }], { other: 'something' });
 });
 
-test("False query params = 'false'", function() {
+test("False query params = 'false'", function(assert) {
   var handler = {};
   var router = new RouteRecognizer();
   router.add([{ path: "/foo/bar", handler: handler }]);
 
-  deepEqual(router.recognize("/foo/bar?show=false").queryParams, {show: 'false'});
-  deepEqual(router.recognize("/foo/bar?show=false&other=something").queryParams, {show: 'false', other: 'something' });
+  assert.deepEqual(router.recognize("/foo/bar?show=false").queryParams, {show: 'false'});
+  assert.deepEqual(router.recognize("/foo/bar?show=false&other=something").queryParams, {show: 'false', other: 'something' });
 });
 
-test("True query params = 'true'", function() {
+test("True query params = 'true'", function(assert) {
   var handler = {};
   var router = new RouteRecognizer();
   router.add([{ path: "/foo/bar", handler: handler }]);
 
-  deepEqual(router.recognize("/foo/bar?show=true").queryParams, {show: 'true'});
-  deepEqual(router.recognize("/foo/bar?show=true&other=something").queryParams, {show: 'true', other: 'something' });
+  assert.deepEqual(router.recognize("/foo/bar?show=true").queryParams, {show: 'true'});
+  assert.deepEqual(router.recognize("/foo/bar?show=true&other=something").queryParams, {show: 'true', other: 'something' });
 });
 
-test("Query params without '='", function() {
+test("Query params without '='", function(assert) {
     var handler = {};
     var router = new RouteRecognizer();
     router.add([{ path: "/foo/bar", handler: handler }]);
 
-    deepEqual(router.recognize("/foo/bar?show").queryParams, {show: 'true'});
-    deepEqual(router.recognize("/foo/bar?show&hide").queryParams, {show: 'true', hide: 'true'});
+    assert.deepEqual(router.recognize("/foo/bar?show").queryParams, {show: 'true'});
+    assert.deepEqual(router.recognize("/foo/bar?show&hide").queryParams, {show: 'true', hide: 'true'});
 });
 
-test("Query params with = and without value are empty string", function() {
+test("Query params with = and without value are empty string", function(assert) {
   var handler = {};
   var router = new RouteRecognizer();
   router.add([{ path: "/foo/bar", handler: handler }]);
 
-  deepEqual(router.recognize("/foo/bar?search=").queryParams, {search: ''});
-  deepEqual(router.recognize("/foo/bar?search=&other=something").queryParams, {search: '', other: 'something' });
+  assert.deepEqual(router.recognize("/foo/bar?search=").queryParams, {search: ''});
+  assert.deepEqual(router.recognize("/foo/bar?search=&other=something").queryParams, {search: '', other: 'something' });
 });
 
-test("A simple route with multiple query params recognizes", function() {
+test("A simple route with multiple query params recognizes", function(assert) {
   var handler = {};
   var router = new RouteRecognizer();
   router.add([{ path: "/foo/bar", handler: handler, queryParams: ['sort', 'direction', 'category'] }]);
 
-  deepEqual(router.recognize("/foo/bar?sort=date&other=something").queryParams, {sort: 'date', other: 'something' });
-  deepEqual(router.recognize("/foo/bar?sort=date&other=something&direction=asc").queryParams, {sort: 'date', direction: 'asc', other: 'something' });
-  deepEqual(router.recognize("/foo/bar?sort=date&other=something&direction=asc&category=awesome").queryParams, {sort: 'date', direction: 'asc', category: 'awesome', other: 'something'});
-  deepEqual(router.recognize("/foo/bar?other=something").queryParams, { other: 'something' });
+  assert.deepEqual(router.recognize("/foo/bar?sort=date&other=something").queryParams, {sort: 'date', other: 'something' });
+  assert.deepEqual(router.recognize("/foo/bar?sort=date&other=something&direction=asc").queryParams, {sort: 'date', direction: 'asc', other: 'something' });
+  assert.deepEqual(router.recognize("/foo/bar?sort=date&other=something&direction=asc&category=awesome").queryParams, {sort: 'date', direction: 'asc', category: 'awesome', other: 'something'});
+  assert.deepEqual(router.recognize("/foo/bar?other=something").queryParams, { other: 'something' });
 });
 
-test("A simple route with query params with encoding recognizes", function() {
+test("A simple route with query params with encoding recognizes", function(assert) {
   var handler = {};
   var router = new RouteRecognizer();
   router.add([{ path: "/foo/bar", handler: handler}]);
 
-  deepEqual(router.recognize("/foo/bar?other=something%20100%25").queryParams, { other: 'something 100%' });
+  assert.deepEqual(router.recognize("/foo/bar?other=something%20100%25").queryParams, { other: 'something 100%' });
 });
 
-test("A route with query params with pluses for spaces instead of %20 recognizes", function() {
+test("A route with query params with pluses for spaces instead of %20 recognizes", function(assert) {
   var handler = {};
   var router = new RouteRecognizer();
   router.add([{ path: "/foo/bar", handler: handler}]);
 
-  deepEqual(router.recognize("/foo/bar?++one+two=three+four+five++").queryParams, { '  one two': 'three four five  ' });
+  assert.deepEqual(router.recognize("/foo/bar?++one+two=three+four+five++").queryParams, { '  one two': 'three four five  ' });
 });
 
-test("A `/` route recognizes", function() {
+test("A `/` route recognizes", function(assert) {
   var handler = {};
   var router = new RouteRecognizer();
   router.add([{ path: "/", handler: handler }]);
 
-  resultsMatch(router.recognize("/"), [{ handler: handler, params: {}, isDynamic: false }]);
+  resultsMatch(assert, router.recognize("/"), [{ handler: handler, params: {}, isDynamic: false }]);
 });
 
-test("A `/` route with query params recognizes", function() {
+test("A `/` route with query params recognizes", function(assert) {
   var handler = {};
   var router = new RouteRecognizer();
   router.add([{ path: "/", handler: handler }]);
 
-  resultsMatch(router.recognize("/?lemon=jello"), [{ handler: handler, params: {}, isDynamic: false }], { lemon: 'jello' });
+  resultsMatch(assert, router.recognize("/?lemon=jello"), [{ handler: handler, params: {}, isDynamic: false }], { lemon: 'jello' });
 });
 
-test("A dynamic route recognizes", function() {
+test("A dynamic route recognizes", function(assert) {
   var handler = {};
   var router = new RouteRecognizer();
   router.add([{ path: "/foo/:bar", handler: handler }]);
 
-  resultsMatch(router.recognize("/foo/bar"), [{ handler: handler, params: { bar: "bar" }, isDynamic: true }]);
-  resultsMatch(router.recognize("/foo/1"), [{ handler: handler, params: { bar: "1" }, isDynamic: true }]);
-  equal(router.recognize("/zoo/baz"), null);
+  resultsMatch(assert, router.recognize("/foo/bar"), [{ handler: handler, params: { bar: "bar" }, isDynamic: true }]);
+  resultsMatch(assert, router.recognize("/foo/1"), [{ handler: handler, params: { bar: "1" }, isDynamic: true }]);
+  assert.equal(router.recognize("/zoo/baz"), null);
 });
 
 var nonAsciiDynamicExpectations = [{
@@ -298,20 +297,20 @@ dynamicExpectations.forEach(function(expectation) {
   paths.forEach(function(path, index) {
     var unencodedMatch = unencodedMatches[index];
 
-    test("Single-segment dynamic route '" + route + "' recognizes path '" + path + "'", function() {
+    test("Single-segment dynamic route '" + route + "' recognizes path '" + path + "'", function(assert) {
       var handler = {};
       var router = new RouteRecognizer();
       router.add([{ path: route, handler: handler }]);
-      resultsMatch(router.recognize(path), [{ handler: handler, params: { bar: match }, isDynamic: true }]);
+      resultsMatch(assert, router.recognize(path), [{ handler: handler, params: { bar: match }, isDynamic: true }]);
     });
 
-    test("When RouteRecognizer.ENCODE_AND_DECODE_PATH_SEGMENTS is false, single-segment dynamic route '" + route + "' recognizes path '" + path + "'", function() {
+    test("When RouteRecognizer.ENCODE_AND_DECODE_PATH_SEGMENTS is false, single-segment dynamic route '" + route + "' recognizes path '" + path + "'", function(assert) {
       RouteRecognizer.ENCODE_AND_DECODE_PATH_SEGMENTS = false;
 
       var handler = {};
       var router = new RouteRecognizer();
       router.add([{ path: route, handler: handler }]);
-      resultsMatch(router.recognize(path), [{ handler: handler, params: { bar: unencodedMatch }, isDynamic: true }]);
+      resultsMatch(assert, router.recognize(path), [{ handler: handler, params: { bar: unencodedMatch }, isDynamic: true }]);
 
       RouteRecognizer.ENCODE_AND_DECODE_PATH_SEGMENTS = true;
     });
@@ -365,36 +364,36 @@ multiSegmentDynamicExpectations.forEach(function(expectation) {
   paths.forEach(function(path, index) {
     var unencodedMatch = unencodedMatches[index];
 
-    test("Multi-segment dynamic route '" + route + "' recognizes path '" + path + "'", function() {
+    test("Multi-segment dynamic route '" + route + "' recognizes path '" + path + "'", function(assert) {
       var handler = {};
       var router = new RouteRecognizer();
       router.add([{ path: route, handler: handler }]);
 
-      resultsMatch(router.recognize(path), [{ handler: handler, params: match, isDynamic: true }]);
+      resultsMatch(assert, router.recognize(path), [{ handler: handler, params: match, isDynamic: true }]);
     });
 
-    test("When RouteRecognizer.ENCODE_AND_DECODE_PATH_SEGMENTS is false, multi-segment dynamic route '" + route + "' recognizes path '" + path + "'", function() {
+    test("When RouteRecognizer.ENCODE_AND_DECODE_PATH_SEGMENTS is false, multi-segment dynamic route '" + route + "' recognizes path '" + path + "'", function(assert) {
       RouteRecognizer.ENCODE_AND_DECODE_PATH_SEGMENTS = false;
 
       var handler = {};
       var router = new RouteRecognizer();
       router.add([{ path: route, handler: handler }]);
 
-      resultsMatch(router.recognize(path), [{ handler: handler, params: unencodedMatch, isDynamic: true }]);
+      resultsMatch(assert, router.recognize(path), [{ handler: handler, params: unencodedMatch, isDynamic: true }]);
 
       RouteRecognizer.ENCODE_AND_DECODE_PATH_SEGMENTS = true;
     });
   });
 });
 
-test("A dynamic route with unicode match parameters recognizes", function() {
+test("A dynamic route with unicode match parameters recognizes", function(assert) {
   var handler = {};
   var router = new RouteRecognizer();
   router.add([{ path: "/:föo/bar/:bäz", handler: handler }]);
   var path = "/foo/bar/baz";
 
   var expectedParams = { föo: "foo", bäz: "baz" };
-  resultsMatch(router.recognize(path), [{ handler: handler, params: expectedParams, isDynamic: true }]);
+  resultsMatch(assert, router.recognize(path), [{ handler: handler, params: expectedParams, isDynamic: true }]);
 });
 
 var starSimpleExpectations = [
@@ -421,11 +420,11 @@ starSimpleExpectations.forEach(function(value) {
   var route = "/foo/*bar";
   var path = "/foo/" + value;
 
-  test("Star segment glob route '" + route + "' recognizes path '" + path + '"', function() {
+  test("Star segment glob route '" + route + "' recognizes path '" + path + '"', function(assert) {
     var handler = {};
     var router = new RouteRecognizer();
     router.add([{ path: route, handler: handler }]);
-    resultsMatch(router.recognize(path), [{ handler: handler, params: { bar: value }, isDynamic: true }]);
+    resultsMatch(assert, router.recognize(path), [{ handler: handler, params: { bar: value }, isDynamic: true }]);
   });
 });
 
@@ -448,16 +447,16 @@ starComplexExpectations.forEach(function(expectation) {
   var path = expectation.path;
   var params = { prefix: expectation.params[0], suffix: expectation.params[1] };
 
-  test("Complex star segment glob route '" + route + "' recognizes path '" + path + '"', function() {
+  test("Complex star segment glob route '" + route + "' recognizes path '" + path + '"', function(assert) {
     var router = new RouteRecognizer();
     var handler = {};
     router.add([{ path: route, handler: handler }]);
 
-    resultsMatch(router.recognize(path), [{ handler: handler, params: params, isDynamic: true }]);
+    resultsMatch(assert, router.recognize(path), [{ handler: handler, params: params, isDynamic: true }]);
   });
 });
 
-test("Multiple routes recognize", function() {
+test("Multiple routes recognize", function(assert) {
   var handler1 = { handler: 1 };
   var handler2 = { handler: 2 };
   var router = new RouteRecognizer();
@@ -465,20 +464,20 @@ test("Multiple routes recognize", function() {
   router.add([{ path: "/foo/:bar", handler: handler1 }]);
   router.add([{ path: "/bar/:baz", handler: handler2 }]);
 
-  resultsMatch(router.recognize("/foo/bar"), [{ handler: handler1, params: { bar: "bar" }, isDynamic: true }]);
-  resultsMatch(router.recognize("/bar/1"), [{ handler: handler2, params: { baz: "1" }, isDynamic: true }]);
+  resultsMatch(assert, router.recognize("/foo/bar"), [{ handler: handler1, params: { bar: "bar" }, isDynamic: true }]);
+  resultsMatch(assert, router.recognize("/bar/1"), [{ handler: handler2, params: { baz: "1" }, isDynamic: true }]);
 });
 
-test("query params ignore the URI malformed error", function() {
+test("query params ignore the URI malformed error", function(assert) {
   var handler1 = { handler: 1 };
   var router = new RouteRecognizer();
 
   router.add([{ path: "/foo", handler: handler1 }]);
 
-  deepEqual(router.recognize("/foo?a=1%").queryParams, {a: ""});
+  assert.deepEqual(router.recognize("/foo?a=1%").queryParams, {a: ""});
 });
 
-test("Multiple routes with overlapping query params recognize", function() {
+test("Multiple routes with overlapping query params recognize", function(assert) {
   var handler1 = { handler: 1 };
   var handler2 = { handler: 2 };
   var router = new RouteRecognizer();
@@ -486,53 +485,53 @@ test("Multiple routes with overlapping query params recognize", function() {
   router.add([{ path: "/foo", handler: handler1 }]);
   router.add([{ path: "/bar", handler: handler2 }]);
 
-  deepEqual(router.recognize("/foo").queryParams, {});
-  deepEqual(router.recognize("/foo?a=1").queryParams, {a: "1"});
-  deepEqual(router.recognize("/foo?a=1&b=2").queryParams, {a: "1", b: "2"});
-  deepEqual(router.recognize("/foo?a=1&b=2&c=3").queryParams, {a: "1", b: "2", c: "3"});
-  deepEqual(router.recognize("/foo?b=2&c=3").queryParams, {b: "2", c: "3"});
-  deepEqual(router.recognize("/foo?c=3").queryParams, { c: "3" });
-  deepEqual(router.recognize("/foo?a=1&c=3").queryParams, {a: "1", c: "3" });
+  assert.deepEqual(router.recognize("/foo").queryParams, {});
+  assert.deepEqual(router.recognize("/foo?a=1").queryParams, {a: "1"});
+  assert.deepEqual(router.recognize("/foo?a=1&b=2").queryParams, {a: "1", b: "2"});
+  assert.deepEqual(router.recognize("/foo?a=1&b=2&c=3").queryParams, {a: "1", b: "2", c: "3"});
+  assert.deepEqual(router.recognize("/foo?b=2&c=3").queryParams, {b: "2", c: "3"});
+  assert.deepEqual(router.recognize("/foo?c=3").queryParams, { c: "3" });
+  assert.deepEqual(router.recognize("/foo?a=1&c=3").queryParams, {a: "1", c: "3" });
 
-  deepEqual(router.recognize("/bar").queryParams, {});
-  deepEqual(router.recognize("/bar?a=1").queryParams, { a: "1" });
-  deepEqual(router.recognize("/bar?a=1&b=2").queryParams, { a: "1", b: "2"});
-  deepEqual(router.recognize("/bar?a=1&b=2&c=3").queryParams, { a: "1", b: "2", c: "3"});
-  deepEqual(router.recognize("/bar?b=2&c=3").queryParams, {b: "2", c: "3"});
-  deepEqual(router.recognize("/bar?c=3").queryParams, {c: "3"});
-  deepEqual(router.recognize("/bar?a=1&c=3").queryParams, {a: "1", c: "3"});
+  assert.deepEqual(router.recognize("/bar").queryParams, {});
+  assert.deepEqual(router.recognize("/bar?a=1").queryParams, { a: "1" });
+  assert.deepEqual(router.recognize("/bar?a=1&b=2").queryParams, { a: "1", b: "2"});
+  assert.deepEqual(router.recognize("/bar?a=1&b=2&c=3").queryParams, { a: "1", b: "2", c: "3"});
+  assert.deepEqual(router.recognize("/bar?b=2&c=3").queryParams, {b: "2", c: "3"});
+  assert.deepEqual(router.recognize("/bar?c=3").queryParams, {c: "3"});
+  assert.deepEqual(router.recognize("/bar?a=1&c=3").queryParams, {a: "1", c: "3"});
 });
 
-test("Deserialize query param array", function() {
+test("Deserialize query param array", function(assert) {
   var handler = {};
   var router = new RouteRecognizer();
   router.add([{ path: "/foo/bar", handler: handler }]);
 
   var p = router.recognize("/foo/bar?foo[]=1&foo[]=2").queryParams;
-  ok(Array.isArray(p.foo), "foo is an Array");
-  deepEqual(p, {foo: ["1","2"]});
+  assert.ok(Array.isArray(p.foo), "foo is an Array");
+  assert.deepEqual(p, {foo: ["1","2"]});
 });
 
-test("Array query params do not conflict with controller namespaced query params", function() {
+test("Array query params do not conflict with controller namespaced query params", function(assert) {
   var handler = {};
   var router = new RouteRecognizer();
   router.add([{ path: "/foo/bar", handler: handler }]);
 
   var p = router.recognize("/foo/bar?foo[bar][]=1&foo[bar][]=2&baz=barf").queryParams;
-  ok(Array.isArray(p['foo[bar]']), "foo[bar] is an Array");
-  deepEqual(p, {'foo[bar]': ["1","2"], 'baz': 'barf'});
+  assert.ok(Array.isArray(p['foo[bar]']), "foo[bar] is an Array");
+  assert.deepEqual(p, {'foo[bar]': ["1","2"], 'baz': 'barf'});
 });
 
-test("Multiple `/` routes recognize", function() {
+test("Multiple `/` routes recognize", function(assert) {
   var handler1 = { handler: 1 };
   var handler2 = { handler: 2 };
   var router = new RouteRecognizer();
 
   router.add([{ path: "/", handler: handler1 }, { path: "/", handler: handler2 }]);
-  resultsMatch(router.recognize("/"), [{ handler: handler1, params: {}, isDynamic: false }, { handler: handler2, params: {}, isDynamic: false }]);
+  resultsMatch(assert, router.recognize("/"), [{ handler: handler1, params: {}, isDynamic: false }, { handler: handler2, params: {}, isDynamic: false }]);
 });
 
-test("Overlapping routes recognize", function() {
+test("Overlapping routes recognize", function(assert) {
   var handler1 = { handler: 1 };
   var handler2 = { handler: 2 };
   var router = new RouteRecognizer();
@@ -540,11 +539,11 @@ test("Overlapping routes recognize", function() {
   router.add([{ path: "/foo/:baz", handler: handler2 }]);
   router.add([{ path: "/foo/bar/:bar", handler: handler1 }]);
 
-  resultsMatch(router.recognize("/foo/bar/1"), [{ handler: handler1, params: { bar: "1" }, isDynamic: true }]);
-  resultsMatch(router.recognize("/foo/1"), [{ handler: handler2, params: { baz: "1" }, isDynamic: true }]);
+  resultsMatch(assert, router.recognize("/foo/bar/1"), [{ handler: handler1, params: { bar: "1" }, isDynamic: true }]);
+  resultsMatch(assert, router.recognize("/foo/1"), [{ handler: handler2, params: { baz: "1" }, isDynamic: true }]);
 });
 
-test("Overlapping star routes recognize", function() {
+test("Overlapping star routes recognize", function(assert) {
   var handler1 = { handler: 1 };
   var handler2 = { handler: 2 };
   var router = new RouteRecognizer();
@@ -552,11 +551,11 @@ test("Overlapping star routes recognize", function() {
   router.add([{ path: "/foo/*bar", handler: handler2 }]);
   router.add([{ path: "/*foo", handler: handler1 }]);
 
-  resultsMatch(router.recognize("/foo/1"), [{ handler: handler2, params: { bar: "1" }, isDynamic: true }]);
-  resultsMatch(router.recognize("/1"), [{ handler: handler1, params: { foo: "1" }, isDynamic: true }]);
+  resultsMatch(assert, router.recognize("/foo/1"), [{ handler: handler2, params: { bar: "1" }, isDynamic: true }]);
+  resultsMatch(assert, router.recognize("/1"), [{ handler: handler1, params: { foo: "1" }, isDynamic: true }]);
 });
 
-test("Prefers single dynamic segments over stars", function() {
+test("Prefers single dynamic segments over stars", function(assert) {
   var handler1 = { handler: 1 };
   var handler2 = { handler: 2 };
   var router = new RouteRecognizer();
@@ -564,12 +563,12 @@ test("Prefers single dynamic segments over stars", function() {
   router.add([{ path: "/foo/*star", handler: handler1 }]);
   router.add([{ path: "/foo/*star/:dynamic", handler: handler2 }]);
 
-  resultsMatch(router.recognize("/foo/1"), [{ handler: handler1, params: { star: "1" }, isDynamic: true }]);
-  resultsMatch(router.recognize("/foo/suffix"), [{ handler: handler1, params: { star: "suffix" }, isDynamic: true }]);
-  resultsMatch(router.recognize("/foo/bar/suffix"), [{ handler: handler2, params: { star: "bar", dynamic: "suffix" }, isDynamic: true }]);
+  resultsMatch(assert, router.recognize("/foo/1"), [{ handler: handler1, params: { star: "1" }, isDynamic: true }]);
+  resultsMatch(assert, router.recognize("/foo/suffix"), [{ handler: handler1, params: { star: "suffix" }, isDynamic: true }]);
+  resultsMatch(assert, router.recognize("/foo/bar/suffix"), [{ handler: handler2, params: { star: "bar", dynamic: "suffix" }, isDynamic: true }]);
 });
 
-test("Prefers more specific routes over less specific routes", function() {
+test("Prefers more specific routes over less specific routes", function(assert) {
   var handler1 = { handler: 1 };
   var handler2 = { handler: 2 };
   var router = new RouteRecognizer();
@@ -577,11 +576,11 @@ test("Prefers more specific routes over less specific routes", function() {
   router.add([{ path: "/foo/:dynamic/baz", handler: handler1 }]);
   router.add([{ path: "/foo/bar/:dynamic", handler: handler2 }]);
 
-  resultsMatch(router.recognize("/foo/bar/baz"), [{ handler: handler2, params: { dynamic: "baz" }, isDynamic: true }]);
-  resultsMatch(router.recognize("/foo/3/baz"), [{ handler: handler1, params: { dynamic: "3" }, isDynamic: true }]);
+  resultsMatch(assert, router.recognize("/foo/bar/baz"), [{ handler: handler2, params: { dynamic: "baz" }, isDynamic: true }]);
+  resultsMatch(assert, router.recognize("/foo/3/baz"), [{ handler: handler1, params: { dynamic: "3" }, isDynamic: true }]);
 });
 
-test("Prefers more specific routes with stars over less specific dynamic routes", function() {
+test("Prefers more specific routes with stars over less specific dynamic routes", function(assert) {
   var handler1 = { handler: 1 };
   var handler2 = { handler: 2 };
   var router = new RouteRecognizer();
@@ -589,10 +588,10 @@ test("Prefers more specific routes with stars over less specific dynamic routes"
   router.add([{ path: "/foo/*star", handler: handler1 }]);
   router.add([{ path: "/:dynamicOne/:dynamicTwo", handler: handler2 }]);
 
-  resultsMatch(router.recognize("/foo/bar"), [{ handler: handler1, params: { star: "bar" }, isDynamic: true }]);
+  resultsMatch(assert, router.recognize("/foo/bar"), [{ handler: handler1, params: { star: "bar" }, isDynamic: true }]);
 });
 
-test("Handle star routes last when there are trailing `/` routes.", function() {
+test("Handle star routes last when there are trailing `/` routes.", function(assert) {
   var handler1 = { handler: 1 };
   var handler2 = { handler: 2 };
   var handler3 = { handler: 3 };
@@ -603,14 +602,14 @@ test("Handle star routes last when there are trailing `/` routes.", function() {
   router.add([{ path: "/foo/:dynamic", handler: handler1 }, { path: "/baz/:dynamic", handler: handler2 }, { path: "/", handler: handler3 }]);
   router.add([{ path: "/foo/:dynamic", handler: handler1 }, { path: "/*wildcard", handler: handlerWildcard }]);
 
-  resultsMatch(router.recognize("/foo/r3/baz/w10"), [
+  resultsMatch(assert, router.recognize("/foo/r3/baz/w10"), [
     { handler: handler1, params: { dynamic: "r3" }, isDynamic: true },
     { handler: handler2, params: { dynamic: "w10" }, isDynamic: true },
     { handler: handler3, params: { }, isDynamic: false }
   ]);
 });
 
-test("Handle `/` before globs when the route is empty.", function() {
+test("Handle `/` before globs when the route is empty.", function(assert) {
   var handler1 = { handler: 1 };
   var handler2 = { handler: 2 };
   var router = new RouteRecognizer();
@@ -618,61 +617,61 @@ test("Handle `/` before globs when the route is empty.", function() {
   router.add([{ path: "/", handler: handler1 }]);
   router.add([{ path: "/*notFound", handler: handler2 }]);
 
-  resultsMatch(router.recognize("/"), [
+  resultsMatch(assert, router.recognize("/"), [
     { handler: handler1, params: { }, isDynamic: false }
   ]);
 
-  resultsMatch(router.recognize("/hello"), [
+  resultsMatch(assert, router.recognize("/hello"), [
     { handler: handler2, params: { notFound: "hello" }, isDynamic: true }
   ]);
 });
 
-test("Routes with trailing `/` recognize", function() {
+test("Routes with trailing `/` recognize", function(assert) {
   var handler = {};
   var router = new RouteRecognizer();
 
   router.add([{ path: "/foo/bar", handler: handler }]);
-  resultsMatch(router.recognize("/foo/bar/"), [{ handler: handler, params: {}, isDynamic: false }]);
+  resultsMatch(assert, router.recognize("/foo/bar/"), [{ handler: handler, params: {}, isDynamic: false }]);
 });
 
-test("Nested routes recognize", function() {
+test("Nested routes recognize", function(assert) {
   var handler1 = { handler: 1 };
   var handler2 = { handler: 2 };
 
   var router = new RouteRecognizer();
   router.add([{ path: "/foo/:bar", handler: handler1 }, { path: "/baz/:bat", handler: handler2 }], { as: 'foo' });
 
-  resultsMatch(router.recognize("/foo/1/baz/2"), [{ handler: handler1, params: { bar: "1" }, isDynamic: true }, { handler: handler2, params: { bat: "2" }, isDynamic: true }]);
+  resultsMatch(assert, router.recognize("/foo/1/baz/2"), [{ handler: handler1, params: { bar: "1" }, isDynamic: true }, { handler: handler2, params: { bat: "2" }, isDynamic: true }]);
 
-  equal(router.hasRoute('foo'), true);
-  equal(router.hasRoute('bar'), false);
+  assert.equal(router.hasRoute('foo'), true);
+  assert.equal(router.hasRoute('bar'), false);
 });
 
-test("Nested routes with query params recognize", function() {
+test("Nested routes with query params recognize", function(assert) {
   var handler1 = { handler: 1 };
   var handler2 = { handler: 2 };
 
   var router = new RouteRecognizer();
   router.add([{ path: "/foo/:bar", handler: handler1, queryParams: ['a', 'b'] }, { path: "/baz/:bat", handler: handler2, queryParams: ['b', 'c'] }], { as: 'foo' });
 
-  resultsMatch(router.recognize("/foo/4/baz/5?a=1"),
+  resultsMatch(assert, router.recognize("/foo/4/baz/5?a=1"),
     [{ handler: handler1, params: { bar: "4" }, isDynamic: true }, { handler: handler2, params: { bat: "5" }, isDynamic: true }], { a: '1' });
-  resultsMatch(router.recognize("/foo/4/baz/5?a=1&b=2"),
+  resultsMatch(assert, router.recognize("/foo/4/baz/5?a=1&b=2"),
     [{ handler: handler1, params: { bar: "4" }, isDynamic: true }, { handler: handler2, params: { bat: "5" }, isDynamic: true }], { a: '1', b: '2' });
-  resultsMatch(router.recognize("/foo/4/baz/5?a=1&b=2&c=3"),
+  resultsMatch(assert, router.recognize("/foo/4/baz/5?a=1&b=2&c=3"),
     [{ handler: handler1, params: { bar: "4" }, isDynamic: true }, { handler: handler2, params: { bat: "5" }, isDynamic: true }], { a: '1', b: '2', c: '3' });
-  resultsMatch(router.recognize("/foo/4/baz/5?b=2&c=3"),
+  resultsMatch(assert, router.recognize("/foo/4/baz/5?b=2&c=3"),
     [{ handler: handler1, params: { bar: "4" }, isDynamic: true }, { handler: handler2, params: { bat: "5" }, isDynamic: true }], { b: '2', c: '3' });
-  resultsMatch(router.recognize("/foo/4/baz/5?c=3"),
+  resultsMatch(assert, router.recognize("/foo/4/baz/5?c=3"),
     [{ handler: handler1, params: { bar: "4" }, isDynamic: true }, { handler: handler2, params: { bat: "5" }, isDynamic: true }], { c: '3' });
-  resultsMatch(router.recognize("/foo/4/baz/5?a=1&c=3"),
+  resultsMatch(assert, router.recognize("/foo/4/baz/5?a=1&c=3"),
     [{ handler: handler1, params: { bar: "4" }, isDynamic: true }, { handler: handler2, params: { bat: "5" }, isDynamic: true }], { a: '1', c: '3' });
 
-  equal(router.hasRoute('foo'), true);
-  equal(router.hasRoute('bar'), false);
+  assert.equal(router.hasRoute('foo'), true);
+  assert.equal(router.hasRoute('bar'), false);
 });
 
-test("If there are multiple matches, the route with the least dynamic segments wins", function() {
+test("If there are multiple matches, the route with the least dynamic segments wins", function(assert) {
   var handler1 = { handler: 1 };
   var handler2 = { handler: 2 };
   var handler3 = { handler: 3 };
@@ -682,12 +681,12 @@ test("If there are multiple matches, the route with the least dynamic segments w
   router.add([{ path: "/posts/:id", handler: handler2 }]);
   router.add([{ path: "/posts/edit", handler: handler3 }]);
 
-  resultsMatch(router.recognize("/posts/new"), [{ handler: handler1, params: {}, isDynamic: false }]);
-  resultsMatch(router.recognize("/posts/1"), [{ handler: handler2, params: { id: "1" }, isDynamic: true }]);
-  resultsMatch(router.recognize("/posts/edit"), [{ handler: handler3, params: {}, isDynamic: false }]);
+  resultsMatch(assert, router.recognize("/posts/new"), [{ handler: handler1, params: {}, isDynamic: false }]);
+  resultsMatch(assert, router.recognize("/posts/1"), [{ handler: handler2, params: { id: "1" }, isDynamic: true }]);
+  resultsMatch(assert, router.recognize("/posts/edit"), [{ handler: handler3, params: {}, isDynamic: false }]);
 });
 
-test("Empty paths", function() {
+test("Empty paths", function(assert) {
   var handler1 = { handler: 1 };
   var handler2 = { handler: 2 };
   var handler3 = { handler: 3 };
@@ -697,11 +696,11 @@ test("Empty paths", function() {
   router.add([{ path: "/foo", handler: handler1 }, { path: "/", handler: handler2 }, { path: "/bar", handler: handler3 }]);
   router.add([{ path: "/foo", handler: handler1 }, { path: "/", handler: handler2 }, { path: "/baz", handler: handler4 }]);
 
-  resultsMatch(router.recognize("/foo/bar"), [{ handler: handler1, params: {}, isDynamic: false }, { handler: handler2, params: {}, isDynamic: false }, { handler: handler3, params: {}, isDynamic: false }]);
-  resultsMatch(router.recognize("/foo/baz"), [{ handler: handler1, params: {}, isDynamic: false }, { handler: handler2, params: {}, isDynamic: false }, { handler: handler4, params: {}, isDynamic: false }]);
+  resultsMatch(assert, router.recognize("/foo/bar"), [{ handler: handler1, params: {}, isDynamic: false }, { handler: handler2, params: {}, isDynamic: false }, { handler: handler3, params: {}, isDynamic: false }]);
+  resultsMatch(assert, router.recognize("/foo/baz"), [{ handler: handler1, params: {}, isDynamic: false }, { handler: handler2, params: {}, isDynamic: false }, { handler: handler4, params: {}, isDynamic: false }]);
 });
 
-test("Repeated empty segments don't confuse the recognizer", function() {
+test("Repeated empty segments don't confuse the recognizer", function(assert) {
   var handler1 = { handler: 1 },
       handler2 = { handler: 2 },
       handler3 = { handler: 3 },
@@ -711,19 +710,19 @@ test("Repeated empty segments don't confuse the recognizer", function() {
   router.add([{ path: "/", handler: handler1 }, { path: "/", handler: handler2 }, { path: "/", handler: handler3 }]);
   router.add([{ path: "/", handler: handler1 }, { path: "/", handler: handler2 }, { path: "/foo", handler: handler4 }]);
 
-  resultsMatch(router.recognize("/"), [{ handler: handler1, params: {}, isDynamic: false }, { handler: handler2, params: {}, isDynamic: false }, { handler: handler3, params: {}, isDynamic: false }]);
-  resultsMatch(router.recognize(""), [{ handler: handler1, params: {}, isDynamic: false }, { handler: handler2, params: {}, isDynamic: false }, { handler: handler3, params: {}, isDynamic: false }]);
-  resultsMatch(router.recognize("/foo"), [{ handler: handler1, params: {}, isDynamic: false }, { handler: handler2, params: {}, isDynamic: false }, { handler: handler4, params: {}, isDynamic: false }]);
-  resultsMatch(router.recognize("foo"), [{ handler: handler1, params: {}, isDynamic: false }, { handler: handler2, params: {}, isDynamic: false }, { handler: handler4, params: {}, isDynamic: false }]);
+  resultsMatch(assert, router.recognize("/"), [{ handler: handler1, params: {}, isDynamic: false }, { handler: handler2, params: {}, isDynamic: false }, { handler: handler3, params: {}, isDynamic: false }]);
+  resultsMatch(assert, router.recognize(""), [{ handler: handler1, params: {}, isDynamic: false }, { handler: handler2, params: {}, isDynamic: false }, { handler: handler3, params: {}, isDynamic: false }]);
+  resultsMatch(assert, router.recognize("/foo"), [{ handler: handler1, params: {}, isDynamic: false }, { handler: handler2, params: {}, isDynamic: false }, { handler: handler4, params: {}, isDynamic: false }]);
+  resultsMatch(assert, router.recognize("foo"), [{ handler: handler1, params: {}, isDynamic: false }, { handler: handler2, params: {}, isDynamic: false }, { handler: handler4, params: {}, isDynamic: false }]);
 });
 
 // BUG - https://github.com/emberjs/ember.js/issues/2559
-test("Dynamic routes without leading `/` and single length param are recognized", function() {
+test("Dynamic routes without leading `/` and single length param are recognized", function(assert) {
   var handler = {};
   var router = new RouteRecognizer();
 
   router.add([{ path: "/foo/:id", handler: handler }]);
-  resultsMatch(router.recognize("foo/1"), [{ handler: handler, params: { id: '1' }, isDynamic: true }]);
+  resultsMatch(assert, router.recognize("foo/1"), [{ handler: handler, params: { id: '1' }, isDynamic: true }]);
 });
 
 var router, handlers;
@@ -745,14 +744,14 @@ module("Route Generation", {
   }
 });
 
-test("Generation works", function() {
-  equal( router.generate("index"), "/" );
-  equal( router.generate("post", { id: 1 }), "/posts/1" );
-  equal( router.generate("posts"), "/posts" );
-  equal( router.generate("new_post"), "/posts/new" );
-  equal( router.generate("edit_post", { id: 1 }), "/posts/1/edit" );
-  equal( router.generate("postIndex"), "/posts" );
-  equal( router.generate("catchall", { catchall: "foo"}), "/foo" );
+test("Generation works", function(assert) {
+  assert.equal( router.generate("index"), "/" );
+  assert.equal( router.generate("post", { id: 1 }), "/posts/1" );
+  assert.equal( router.generate("posts"), "/posts" );
+  assert.equal( router.generate("new_post"), "/posts/new" );
+  assert.equal( router.generate("edit_post", { id: 1 }), "/posts/1/edit" );
+  assert.equal( router.generate("postIndex"), "/posts" );
+  assert.equal( router.generate("catchall", { catchall: "foo"}), "/foo" );
 });
 
 var encodedCharGenerationExpectations = [{
@@ -798,13 +797,13 @@ encodedCharGenerationExpectations.forEach(function(expectation) {
   var expected = expectation.expected;
   var expectedUnencoded = expectation.expectedUnencoded;
 
-  test("Encodes dynamic segment value for route '" + route + "' with params " + JSON.stringify(params), function() {
-    equal(router.generate(route, params), expected);
+  test("Encodes dynamic segment value for route '" + route + "' with params " + JSON.stringify(params), function(assert) {
+    assert.equal(router.generate(route, params), expected);
   });
 
-  test("When RouteRecognizer.ENCODE_AND_DECODE_PATH_SEGMENTS is false, does not encode dynamic segment for route '" + route + "' with params " + JSON.stringify(params), function() {
+  test("When RouteRecognizer.ENCODE_AND_DECODE_PATH_SEGMENTS is false, does not encode dynamic segment for route '" + route + "' with params " + JSON.stringify(params), function(assert) {
     RouteRecognizer.ENCODE_AND_DECODE_PATH_SEGMENTS = false;
-    equal(router.generate(route, params), expectedUnencoded);
+    assert.equal(router.generate(route, params), expectedUnencoded);
     RouteRecognizer.ENCODE_AND_DECODE_PATH_SEGMENTS = true;
   });
 });
@@ -824,68 +823,68 @@ var globGenerationValues = [
 ];
 
 globGenerationValues.forEach(function(value) {
-  test("Generating a star segment glob route with param '" + value + "' passes value through without modification", function() {
-    equal(router.generate("catchall", { catchall: value }), "/" + value);
+  test("Generating a star segment glob route with param '" + value + "' passes value through without modification", function(assert) {
+    assert.equal(router.generate("catchall", { catchall: value }), "/" + value);
   });
 });
 
-test("Parsing and generation results into the same input string", function() {
+test("Parsing and generation results into the same input string", function(assert) {
   var query = "filter%20data=date";
-  equal(router.generateQueryString(router.parseQueryString(query)), '?' + query);
+  assert.equal(router.generateQueryString(router.parseQueryString(query)), '?' + query);
 });
 
-test("Generation works with query params", function() {
-  equal( router.generate("index", {queryParams: {filter: 'date'}}), "/?filter=date" );
-  equal( router.generate("index", {queryParams: {filter: true}}), "/?filter=true" );
-  equal( router.generate("posts", {queryParams: {sort: 'title'}}), "/posts?sort=title");
-  equal( router.generate("edit_post", { id: 1, queryParams: {format: 'markdown'} }), "/posts/1/edit?format=markdown" );
-  equal( router.generate("edit_post", { id: 1, queryParams: {editor: 'ace'} }), "/posts/1/edit?editor=ace" );
-  equal( router.generate("edit_post", { id: 1, queryParams: {format: 'markdown', editor: 'ace'} }),"/posts/1/edit?editor=ace&format=markdown" );
-  equal( router.generate("edit_post", { id: 1, queryParams: {format: 'markdown', editor: 'ace'} }),"/posts/1/edit?editor=ace&format=markdown" );
-  equal( router.generate("edit_post", { id: 1, queryParams: {format: true, editor: 'ace'} }),"/posts/1/edit?editor=ace&format=true" );
-  equal( router.generate("edit_post", { id: 1, queryParams: {format: 'markdown', editor: true} }),"/posts/1/edit?editor=true&format=markdown" );
-  equal( router.generate("foo", { bar: 9, bat: 10, queryParams: {a: 1} }),"/foo/9/baz/10?a=1" );
-  equal( router.generate("foo", { bar: 9, bat: 10, queryParams: {b: 2} }),"/foo/9/baz/10?b=2" );
-  equal( router.generate("foo", { bar: 9, bat: 10, queryParams: {a: 1, b: 2} }),"/foo/9/baz/10?a=1&b=2" );
-  equal( router.generate("index", {queryParams: {filter: 'date', sort: false}}), "/?filter=date&sort=false" );
-  equal( router.generate("index", {queryParams: {filter: 'date', sort: null}}), "/?filter=date" );
-  equal( router.generate("index", {queryParams: {filter: 'date', sort: undefined}}), "/?filter=date" );
-  equal( router.generate("index", {queryParams: {filter: 'date', sort: 0}}), "/?filter=date&sort=0" );
+test("Generation works with query params", function(assert) {
+  assert.equal( router.generate("index", {queryParams: {filter: 'date'}}), "/?filter=date" );
+  assert.equal( router.generate("index", {queryParams: {filter: true}}), "/?filter=true" );
+  assert.equal( router.generate("posts", {queryParams: {sort: 'title'}}), "/posts?sort=title");
+  assert.equal( router.generate("edit_post", { id: 1, queryParams: {format: 'markdown'} }), "/posts/1/edit?format=markdown" );
+  assert.equal( router.generate("edit_post", { id: 1, queryParams: {editor: 'ace'} }), "/posts/1/edit?editor=ace" );
+  assert.equal( router.generate("edit_post", { id: 1, queryParams: {format: 'markdown', editor: 'ace'} }),"/posts/1/edit?editor=ace&format=markdown" );
+  assert.equal( router.generate("edit_post", { id: 1, queryParams: {format: 'markdown', editor: 'ace'} }),"/posts/1/edit?editor=ace&format=markdown" );
+  assert.equal( router.generate("edit_post", { id: 1, queryParams: {format: true, editor: 'ace'} }),"/posts/1/edit?editor=ace&format=true" );
+  assert.equal( router.generate("edit_post", { id: 1, queryParams: {format: 'markdown', editor: true} }),"/posts/1/edit?editor=true&format=markdown" );
+  assert.equal( router.generate("foo", { bar: 9, bat: 10, queryParams: {a: 1} }),"/foo/9/baz/10?a=1" );
+  assert.equal( router.generate("foo", { bar: 9, bat: 10, queryParams: {b: 2} }),"/foo/9/baz/10?b=2" );
+  assert.equal( router.generate("foo", { bar: 9, bat: 10, queryParams: {a: 1, b: 2} }),"/foo/9/baz/10?a=1&b=2" );
+  assert.equal( router.generate("index", {queryParams: {filter: 'date', sort: false}}), "/?filter=date&sort=false" );
+  assert.equal( router.generate("index", {queryParams: {filter: 'date', sort: null}}), "/?filter=date" );
+  assert.equal( router.generate("index", {queryParams: {filter: 'date', sort: undefined}}), "/?filter=date" );
+  assert.equal( router.generate("index", {queryParams: {filter: 'date', sort: 0}}), "/?filter=date&sort=0" );
 });
 
-test("Generation works with array query params", function() {
-  equal( router.generate("index", {queryParams: {foo: [1,2,3]}}), "/?foo[]=1&foo[]=2&foo[]=3" );
+test("Generation works with array query params", function(assert) {
+  assert.equal( router.generate("index", {queryParams: {foo: [1,2,3]}}), "/?foo[]=1&foo[]=2&foo[]=3" );
 });
 
-test("Generation works with controller namespaced array query params", function() {
-  equal( router.generate("posts", {queryParams: {'foo[bar]': [1,2,3]}}), "/posts?foo[bar][]=1&foo[bar][]=2&foo[bar][]=3" );
+test("Generation works with controller namespaced array query params", function(assert) {
+  assert.equal( router.generate("posts", {queryParams: {'foo[bar]': [1,2,3]}}), "/posts?foo[bar][]=1&foo[bar][]=2&foo[bar][]=3" );
 });
 
-test("Empty query params don't have an extra question mark", function() {
-  equal( router.generate("index", {queryParams: {}}), "/" );
-  equal( router.generate("index", {queryParams: null}), "/" );
-  equal( router.generate("posts", {queryParams: {}}), "/posts");
-  equal( router.generate("posts", {queryParams: null}), "/posts");
-  equal( router.generate("posts", {queryParams: { foo: null } }), "/posts");
-  equal( router.generate("posts", {queryParams: { foo: undefined } }), "/posts");
+test("Empty query params don't have an extra question mark", function(assert) {
+  assert.equal( router.generate("index", {queryParams: {}}), "/" );
+  assert.equal( router.generate("index", {queryParams: null}), "/" );
+  assert.equal( router.generate("posts", {queryParams: {}}), "/posts");
+  assert.equal( router.generate("posts", {queryParams: null}), "/posts");
+  assert.equal( router.generate("posts", {queryParams: { foo: null } }), "/posts");
+  assert.equal( router.generate("posts", {queryParams: { foo: undefined } }), "/posts");
 });
 
-test("Generating an invalid named route raises", function() {
-  QUnit.throws(function() {
+test("Generating an invalid named route raises", function(assert) {
+  assert.throws(function() {
     router.generate("nope");
   }, /There is no route named nope/);
 });
 
-test("Getting the handlers for a named route", function() {
-  deepEqual(router.handlersFor("post"), [ { handler: handlers[0], names: ['id'], shouldDecodes: [true] } ]);
-  deepEqual(router.handlersFor("posts"), [ { handler: handlers[1], names: [], shouldDecodes: [] } ]);
-  deepEqual(router.handlersFor("new_post"), [ { handler: handlers[2], names: [], shouldDecodes: [] } ]);
-  deepEqual(router.handlersFor("edit_post"), [ { handler: handlers[3], names: ['id'], shouldDecodes: [true] } ]);
-  deepEqual(router.handlersFor("catchall"), [ { handler: handlers[5], names: ['catchall'], shouldDecodes: [false] } ]);
+test("Getting the handlers for a named route", function(assert) {
+  assert.deepEqual(router.handlersFor("post"), [ { handler: handlers[0], names: ['id'], shouldDecodes: [true] } ]);
+  assert.deepEqual(router.handlersFor("posts"), [ { handler: handlers[1], names: [], shouldDecodes: [] } ]);
+  assert.deepEqual(router.handlersFor("new_post"), [ { handler: handlers[2], names: [], shouldDecodes: [] } ]);
+  assert.deepEqual(router.handlersFor("edit_post"), [ { handler: handlers[3], names: ['id'], shouldDecodes: [true] } ]);
+  assert.deepEqual(router.handlersFor("catchall"), [ { handler: handlers[5], names: ['catchall'], shouldDecodes: [false] } ]);
 });
 
-test("Getting a handler for an invalid named route raises", function() {
-    QUnit.throws(function() {
+test("Getting a handler for an invalid named route raises", function(assert) {
+    assert.throws(function() {
         router.handlersFor("nope");
     }, /There is no route named nope/);
 });
