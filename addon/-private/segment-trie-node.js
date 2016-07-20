@@ -16,8 +16,7 @@ function matcher(path, callback) {
   for (var i = 0; i < segments.length; i++) {
     segments[i] = buildSegmentTrieNode(this.router, segments[i]);
 
-    leaf.append(segments[i]);
-    leaf = segments[i];
+    leaf = leaf.append(segments[i]);
   }
 
   if (callback) {
@@ -49,6 +48,10 @@ class SegmentTrieNode {
 
   get regex() {
     return '';
+  }
+
+  get score() {
+    return '0';
   }
 
   output() {
@@ -105,6 +108,10 @@ class StaticSegment extends SegmentTrieNode {
     return this.value;
   }
 
+  get score() {
+    return '3';
+  }
+
   output() {
     return '/' + this.value;
   }
@@ -142,6 +149,10 @@ class EpsilonSegment extends SegmentTrieNode {
     this.type = 'epsilon';
   }
 
+  get score() {
+    return '0';
+  }
+
   appendTo(parentNode) {
     this.parent = parentNode;
     let haystack = this.parent.children.epsilonSegments;
@@ -170,6 +181,10 @@ class DynamicSegment extends SegmentTrieNode {
 
   get regex() {
     return '([^/]+)';
+  }
+
+  get score() {
+    return '2';
   }
 
   output(params) {
@@ -208,6 +223,10 @@ class GlobNode extends SegmentTrieNode {
 
   get regex() {
     return '(.+)';
+  }
+
+  get score() {
+    return '1';
   }
 
   output(params) {

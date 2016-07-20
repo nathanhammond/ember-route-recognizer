@@ -3,10 +3,22 @@ import RecognizeResults from './recognize-results';
 import { bind, isArray } from './polyfills';
 import transition from './nfa-transition';
 
+function moreSpecific(a, b) {
+  for (var i = 0; i < a.length; i++) {
+    if (a.specificity[i] > b.specificity[i]) {
+      return a;
+    } else if (a.specificity[i] < b.specificity[i]) {
+      return b;
+    }
+  }
+
+  return a;
+}
+
 function decodeQueryParamPart(part) {
   // http://www.w3.org/TR/html401/interact/forms.html#h-17.13.4.1
   part = part.replace(/\+/gm, '%20');
-  var result;
+  let result;
   try {
     result = decodeURIComponent(part);
   } catch(error) {result = '';}
@@ -19,25 +31,75 @@ export default class RouteRecognizer {
     this.names = {};
   }
 
-  _process(segmentTrieNode, path) {
+  _process(segmentTrieNode, path, queryParams) {
+    let handlers = new RecognizeResults(queryParams);
+    let specificity = [ 0, 0, '' ]; // [ handlers, segments, segmentType ]
     let segments = [];
 
+    // Calculate specificty, get references in order.
     do {
+      specificity[0] += !!segmentTrieNode.handler;
+      specificity[1]++;
+      specificity[2] = segmentTrieNode.score + specificity[2];
       segments.unshift(segmentTrieNode);
     } while (segmentTrieNode = segmentTrieNode.parent);
 
-    let regex = new RegExp(segments.map(function(segmentTrieNode) {
-      return segmentTrieNode.regex;
-    }).join('/'));
+    // Get regex to match against.
+    let deconstructing = new RegExp(segments
+      .filter((segmentTrieNode) => { return !(segmentTrieNode instanceof EpsilonSegment); })
+      .map((segmentTrieNode) => { return segmentTrieNode.regex; })
+      .join('/')
+    );
+    let matches = deconstructing.exec(path);
 
-    regex.match(path);
+    for (var i = segments.length - 1; i >=0; i--) {
+      segmentTrieNode = segments[i];
+      if (segmentTrieNode.handler) {
+        handlers.unshift({
+          isDynamic: false,
+          handler: segmentTrieNode.handler,
+          params: {}
+        });
+      }
+      if (segmentTrieNode.type === 'dynamic' || segmentTrieNode.type === 'glob') {
+        handlers[0].isDynamic = true;
+        handlers[0].params[segmentTrieNode.value] = matches.pop();
+      }
+    }
 
-    return new RecognizeResults();
+    specificity[2] = parseInt(specificity[2], 10);
+    handlers.specificity = specificity;
+
+    return handlers;
   }
 
   add() {}
-  handlersFor() {}
-  hasRoute() {}
+
+  handlersFor(name) {
+    let segmentTrieNode = this.names[name];
+
+    if (!segmentTrieNode) { throw new Error("There is no route named " + name); }
+
+    let handlers = [];
+
+    do {
+      if (segmentTrieNode.handler) {
+        handlers.push({
+          handler: segmentTrieNode.handler,
+          names: []
+        });
+      }
+      if (segmentTrieNode.type === 'dynamic' || segmentTrieNode.type === 'glob') {
+        handlers[handlers.length - 1].names.unshift(segmentTrieNode.value);
+      }
+    } while (segmentTrieNode.parent);
+
+    return handlers.reverse();
+  }
+
+  hasRoute(name) {
+    return !!this.names[name];
+  }
 
   generate(name, params) {
     let output = '';
@@ -46,6 +108,7 @@ export default class RouteRecognizer {
     if (!segmentTrieNode) { throw new Error("There is no route named " + name); }
 
     let segments = [];
+
     do {
       segments.unshift(segmentTrieNode);
     } while (segmentTrieNode = segmentTrieNode.parent);
@@ -187,13 +250,10 @@ export default class RouteRecognizer {
 
     // Unroll this loop to prevent a branch.
     let solution = this._process(nextSet[0], path);
-    let temporary;
+    let current;
     for (let i = 1; i < nextSet.length; i++) {
-      temporary = this._process(nextSet[i], path);
-
-      if (solution.specificity < temporary.specificity) {
-        solution = temporary;
-      }
+      current = this._process(nextSet[i], path);
+      solution = moreSpecific(solution, current);
     }
 
     return solution;

@@ -10,7 +10,9 @@ RecognizeResults.prototype = oCreate({
   slice:  Array.prototype.slice,
   push:   Array.prototype.push,
   pop:    Array.prototype.pop,
+  unshift:    Array.prototype.unshift,
   length: 0,
+  specificity: null,
   queryParams: null
 });
 
