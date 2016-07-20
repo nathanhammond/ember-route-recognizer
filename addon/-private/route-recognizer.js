@@ -249,10 +249,10 @@ export default class RouteRecognizer {
     }
 
     // Unroll this loop to prevent a branch.
-    let solution = this._process(nextSet[0], path);
+    let solution = this._process(nextSet[0], path, queryParams);
     let current;
     for (let i = 1; i < nextSet.length; i++) {
-      current = this._process(nextSet[i], path);
+      current = this._process(nextSet[i], path, queryParams);
       solution = moreSpecific(solution, current);
     }
 
