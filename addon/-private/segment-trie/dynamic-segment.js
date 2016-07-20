@@ -27,7 +27,7 @@ class DynamicSegment extends SegmentTrieNode {
   appendTo(parentNode) {
     this.parent = parentNode;
     this.haystack = this.parent.children.dynamicSegments;
-    return this.existingOrSelf();
+    return this._existingOrSelf();
   }
 
 }

@@ -13,7 +13,7 @@ class EpsilonSegment extends SegmentTrieNode {
   appendTo(parentNode) {
     this.parent = parentNode;
     this.haystack = this.parent.children.epsilonSegments;
-    return this.existingOrSelf();
+    return this._existingOrSelf();
   }
 
 }

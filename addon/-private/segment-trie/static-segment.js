@@ -32,7 +32,7 @@ class StaticSegment extends SegmentTrieNode {
     }
     this.haystack = haystacks[this.value];
 
-    return this.existingOrSelf();
+    return this._existingOrSelf();
   }
 
 }

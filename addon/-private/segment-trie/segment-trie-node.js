@@ -37,7 +37,7 @@ class SegmentTrieNode {
     throw new Error('appendTo may only be called on a subclass of SegmentTrieNode.');
   }
 
-  equivalent(node) {
+  _equivalent(node) {
     return (
       this.type === node.type &&
       this.value === node.value &&
@@ -45,22 +45,22 @@ class SegmentTrieNode {
     );
   }
 
-  checkExisting() {
+  _checkExisting() {
     for (let i = 0; i < this.haystack.length; i++) {
-      if (this.equivalent(this.haystack[i])) {
+      if (this._equivalent(this.haystack[i])) {
         return this.haystack[i];
       }
     }
     return false;
   }
 
-  existingOrSelf() {
-    let existingNode = this.checkExisting();
+  _existingOrSelf() {
+    let existingNode = this._checkExisting();
     if (existingNode) {
-      // Segment has been seen before, this node is equivalent to an existing node.
+      // This node is equivalent to an existing node.
       return existingNode;
     } else {
-      // Segment has been seen before, but this node isn't equivalent to any existing node.
+      // This node isn't equivalent to any existing node.
       this.haystack.push(this);
     }
 

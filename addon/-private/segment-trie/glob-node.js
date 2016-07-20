@@ -25,7 +25,7 @@ class GlobNode extends SegmentTrieNode {
   appendTo(parentNode) {
     this.parent = parentNode;
     this.haystack = this.parent.children.globNodes;
-    return this.existingOrSelf();
+    return this._existingOrSelf();
   }
 
 }
