@@ -2,6 +2,7 @@ import { matcher, EpsilonSegment } from './segment-trie-node';
 import RecognizeResults from './recognize-results';
 import { bind, isArray } from './polyfills';
 import transition from './nfa-transition';
+import { normalizePath } from './normalizer';
 
 function moreSpecific(a, b) {
   for (var i = 0; i < a.length; i++) {
@@ -27,6 +28,7 @@ function decodeQueryParamPart(part) {
 
 export default class RouteRecognizer {
   constructor() {
+    this.ENCODE_AND_DECODE_PATH_SEGMENTS = RouteRecognizer.ENCODE_AND_DECODE_PATH_SEGMENTS;
     this.rootState = new EpsilonSegment(this);
     this.names = {};
   }
@@ -45,10 +47,13 @@ export default class RouteRecognizer {
     } while (segmentTrieNode = segmentTrieNode.parent);
 
     // Get regex to match against.
-    let deconstructing = new RegExp(segments
-      .filter((segmentTrieNode) => { return !(segmentTrieNode instanceof EpsilonSegment); })
-      .map((segmentTrieNode) => { return segmentTrieNode.regex; })
-      .join('/')
+    let deconstructing = new RegExp(
+      '^' +
+      segments
+        .filter((segmentTrieNode) => { return !(segmentTrieNode instanceof EpsilonSegment); })
+        .map((segmentTrieNode) => { return segmentTrieNode.regex; })
+        .join('/') +
+      '$'
     );
     let matches = deconstructing.exec(path);
 
@@ -73,7 +78,18 @@ export default class RouteRecognizer {
     return handlers;
   }
 
-  add() {}
+  add(routes, options) {
+    options = options || {};
+    let leaf = this.rootState;
+
+    // Go through each passed in route and call the matcher with it.
+    for (var i = 0; i < routes.length; i++) {
+      leaf = matcher.call(leaf, routes[i].path);
+      leaf.to(routes[i].handler);
+    }
+    leaf.name = options.as;
+    this.names[options.as] = leaf;
+  }
 
   handlersFor(name) {
     let segmentTrieNode = this.names[name];
@@ -92,7 +108,7 @@ export default class RouteRecognizer {
       if (segmentTrieNode.type === 'dynamic' || segmentTrieNode.type === 'glob') {
         handlers[handlers.length - 1].names.unshift(segmentTrieNode.value);
       }
-    } while (segmentTrieNode.parent);
+    } while (segmentTrieNode = segmentTrieNode.parent);
 
     return handlers.reverse();
   }
@@ -196,6 +212,8 @@ export default class RouteRecognizer {
   }
 
   recognize(path) {
+    let trailing = '';
+
     // Chop off the hash portion of the URL.
     let hashStart = path.indexOf('#');
     if (hashStart !== -1) {
@@ -211,13 +229,27 @@ export default class RouteRecognizer {
       queryParams = this.parseQueryString(queryString);
     }
 
-    // Remove leading and trailing slashes as they're not matched.
+    // Remove leading slashes as they're not matched.
     path = path.replace(/^[\/]*/, '');
+
+    // Find out if we have a trailing slash.
+    if (path.charCodeAt(path.length - 1) === 47) {
+      trailing = '/';
+    }
+
+    // Remove trailing slashes as they're not matched.
     path = path.replace(/[\/]*$/, '');
 
     // Adjacent mid-route segments in a route definition
     // are treated as an empty-string static segment.
     // No special handling required.
+
+    // Handle normalization.
+    if (this.ENCODE_AND_DECODE_PATH_SEGMENTS) {
+      path = normalizePath(path);
+    } else {
+      path = decodeURI(path);
+    }
 
     // Get the list of segments.
     let segments;
@@ -249,9 +281,11 @@ export default class RouteRecognizer {
     }
 
     // Unroll this loop to prevent a branch.
-    let solution = this._process(nextSet[0], path, queryParams);
+    let matchPath = nextSet[0].type === 'glob' ? path + trailing : path;
+    let solution = this._process(nextSet[0], matchPath, queryParams);
     let current;
     for (let i = 1; i < nextSet.length; i++) {
+      matchPath = nextSet[i].type === 'glob' ? path + trailing : path;
       current = this._process(nextSet[i], path, queryParams);
       solution = moreSpecific(solution, current);
     }
@@ -261,3 +295,5 @@ export default class RouteRecognizer {
 
   toJSON() {}
 }
+
+RouteRecognizer.ENCODE_AND_DECODE_PATH_SEGMENTS = true;

@@ -35,12 +35,16 @@ export default function NFATransition(set, segment) {
       nextSet = nextSet.concat(set[i].children.globNodes);
     }
 
-    // 4. All "recursive" epsilon segments of this built-up nextSet.
+    // 4. All "recursive" epsilon segments of this current set.
     nextSet = descendantEpsilonSegments(nextSet);
 
   } else {
+
+    // 5. All "recursive" epsilon segments of this current set.
+    nextSet = descendantEpsilonSegments(set);
+
     // Handle the last segment by filtering for accepting states.
-    nextSet = undefinedSegment(set);
+    nextSet = undefinedSegment(nextSet);
   }
 
   return nextSet;

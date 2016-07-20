@@ -1,4 +1,5 @@
 import { bind } from './polyfills';
+import { normalizePath } from './normalizer';
 
 function buildSegmentTrieNode(router, value) {
   switch (value.charCodeAt(0)) {
@@ -10,13 +11,25 @@ function buildSegmentTrieNode(router, value) {
 
 function matcher(path, callback) {
   var leaf = this;
-  var segments = path.replace(/^\//, '').split('/');
+  path = path.replace(/^[\/]*/, '');
+  path = path.replace(/[\/]*$/, '');
+
+  var segments;
+  if (path === '') {
+    segments = [];
+  } else {
+    segments = path.split('/');
+  }
 
   // As we're adding segments we need to track the current leaf.
   for (var i = 0; i < segments.length; i++) {
     segments[i] = buildSegmentTrieNode(this.router, segments[i]);
 
     leaf = leaf.append(segments[i]);
+  }
+
+  if (segments.length === 0) {
+    leaf = leaf.append(new EpsilonSegment(this.router));
   }
 
   if (callback) {
@@ -41,6 +54,7 @@ class SegmentTrieNode {
       globNodes: []
     };
 
+    this.name = undefined;
     this.type = undefined;
     this.handler = undefined;
     this.value = value;
@@ -99,8 +113,9 @@ class SegmentTrieNode {
 /* Concrete implementations. */
 
 class StaticSegment extends SegmentTrieNode {
-  constructor() {
-    super(...arguments);
+  constructor(router, value) {
+    value = normalizePath(value);
+    super(router, value);
     this.type = 'static';
   }
 
@@ -222,7 +237,7 @@ class GlobNode extends SegmentTrieNode {
   }
 
   get regex() {
-    return '(.+)';
+    return '(.+)(?:/?)';
   }
 
   get score() {
