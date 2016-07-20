@@ -24,22 +24,10 @@ class GlobNode extends SegmentTrieNode {
 
   appendTo(parentNode) {
     this.parent = parentNode;
-    let haystack = this.parent.children.globNodes;
-
-    let existingNode = this.getDuplicate();
-    if (existingNode) {
-      return existingNode;
-    } else {
-      haystack.push(this);
-    }
-
-    return this;
+    this.haystack = this.parent.children.globNodes;
+    return this.existingOrSelf();
   }
 
-  getDuplicate() {
-    let haystack = this.parent.children.globNodes;
-    return super.getDuplicate(haystack);
-  }
 }
 
 export default GlobNode;

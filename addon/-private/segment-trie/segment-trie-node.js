@@ -1,7 +1,9 @@
 class SegmentTrieNode {
   constructor(router, value) {
     this.router = router;
+
     this.parent = undefined;
+    this.haystack = undefined;
     this.children = {
       staticSegments: {},
       epsilonSegments: [],
@@ -43,18 +45,28 @@ class SegmentTrieNode {
     );
   }
 
-  getDuplicate(haystack) {
-    for (let i = 0; i < haystack.length; i++) {
-      if (this.equivalent(haystack[i])) {
-        return haystack[i];
+  checkExisting() {
+    for (let i = 0; i < this.haystack.length; i++) {
+      if (this.equivalent(this.haystack[i])) {
+        return this.haystack[i];
       }
     }
     return false;
   }
 
-  to() {
+  existingOrSelf() {
+    let existingNode = this.checkExisting();
+    if (existingNode) {
+      // Segment has been seen before, this node is equivalent to an existing node.
+      return existingNode;
+    } else {
+      // Segment has been seen before, but this node isn't equivalent to any existing node.
+      this.haystack.push(this);
+    }
 
+    return this;
   }
+
 }
 
 export default SegmentTrieNode;

@@ -26,22 +26,10 @@ class DynamicSegment extends SegmentTrieNode {
 
   appendTo(parentNode) {
     this.parent = parentNode;
-    let haystack = this.parent.children.dynamicSegments;
-
-    let existingNode = this.getDuplicate();
-    if (existingNode) {
-      return existingNode;
-    } else {
-      haystack.push(this);
-    }
-
-    return this;
+    this.haystack = this.parent.children.dynamicSegments;
+    return this.existingOrSelf();
   }
 
-  getDuplicate() {
-    let haystack = this.parent.children.dynamicSegments;
-    return super.getDuplicate(haystack);
-  }
 }
 
 export default DynamicSegment;

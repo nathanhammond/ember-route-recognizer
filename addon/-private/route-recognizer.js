@@ -37,14 +37,14 @@ export default class RouteRecognizer {
 
   _process(segmentTrieNode, path, queryParams) {
     let handlers = new RecognizeResults(queryParams);
-    let specificity = [ 0, 0, '' ]; // [ handlers, segments, segmentType ]
+    let specificity = [ 0, '', 0 ]; // [ segments, segmentType, handlers ]
     let segments = [];
 
     // Calculate specificty, get references in order.
     do {
-      specificity[0] += !!segmentTrieNode.handler;
-      specificity[1]++;
-      specificity[2] = segmentTrieNode.score + specificity[2];
+      specificity[0]++;
+      specificity[1] = segmentTrieNode.score + specificity[1];
+      specificity[2] += !!segmentTrieNode.handler;
       segments.unshift(segmentTrieNode);
     } while (segmentTrieNode = segmentTrieNode.parent);
 
@@ -79,7 +79,7 @@ export default class RouteRecognizer {
 
     }
 
-    specificity[2] = parseInt(specificity[2], 10);
+    specificity[1] = parseInt(specificity[1], 10);
     handlers.specificity = specificity;
 
     return handlers;

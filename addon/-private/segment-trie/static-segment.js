@@ -24,29 +24,17 @@ class StaticSegment extends SegmentTrieNode {
 
   appendTo(parentNode) {
     this.parent = parentNode;
+
+    // Static segment may not have been seen before.
     let haystacks = this.parent.children.staticSegments;
-
-    // Static segment hasn't been seen before.
-    // Static segment has been seen before, but this node isn't equivalent to any existing.
-    // Static segment has been seen before, this node is equivalent to an existing node.
-
     if (!haystacks[this.value]) {
-      haystacks[this.value] = [ this ];
-    } else {
-      let existingNode = this.getDuplicate();
-      if (existingNode) {
-        return existingNode;
-      } else {
-        haystacks[this.value].push(this);
-      }
+      haystacks[this.value] = [];
     }
-    return this;
+    this.haystack = haystacks[this.value];
+
+    return this.existingOrSelf();
   }
 
-  getDuplicate() {
-    let haystack = this.parent.children.staticSegments[this.value];
-    return super.getDuplicate(haystack);
-  }
 }
 
 export default StaticSegment;
