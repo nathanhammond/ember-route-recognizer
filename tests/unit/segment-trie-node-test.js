@@ -1,4 +1,3 @@
-import SegmentTrieNode from 'ember-route-recognizer/-private/segment-trie/segment-trie-node';
 import DynamicSegment from 'ember-route-recognizer/-private/segment-trie/dynamic-segment';
 import EpsilonSegment from 'ember-route-recognizer/-private/segment-trie/epsilon-segment';
 import GlobNode from 'ember-route-recognizer/-private/segment-trie/glob-node';
@@ -8,14 +7,14 @@ import { module, test } from 'qunit';
 
 module('Unit | SegmentTrieNode');
 
-test('SegmentTrieNode#equivalent', function(assert) {
-  let one = new StaticSegment('value');
-  let two = new StaticSegment('value');
+test('SegmentTrieNode#_equivalent', function(assert) {
+  let one = new StaticSegment({}, 'value');
+  let two = new StaticSegment({}, 'value');
 
-  assert.ok(one.equivalent(two), "Identically constructed nodes are equivalent.");
+  assert.ok(one._equivalent(two), "Identically constructed nodes are equivalent.");
 
   two.handler = "something";
-  assert.ok(!one.equivalent(two), "Modifying the node makes them non-equivalent.");
+  assert.ok(!one._equivalent(two), "Modifying the node makes them non-equivalent.");
 });
 
 test('StaticSegment#append', function(assert) {
