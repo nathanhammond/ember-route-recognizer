@@ -1,7 +1,9 @@
-import { matcher, EpsilonSegment } from './segment-trie-node';
+import EpsilonSegment from './segment-trie/epsilon-segment';
+import transition from './segment-trie/nfa-transition';
+import { matcher } from './dsl';
+
 import RecognizeResults from './recognize-results';
 import { bind, isArray } from './polyfills';
-import transition from './nfa-transition';
 import { normalizePath } from './normalizer';
 
 function moreSpecific(a, b) {

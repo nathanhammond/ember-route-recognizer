@@ -15,6 +15,7 @@ function undefinedSegment(set) {
   });
 }
 
+// This is the process of moving from node to node inside of the segment trie.
 export default function NFATransition(set, segment) {
   var nextSet = [];
 

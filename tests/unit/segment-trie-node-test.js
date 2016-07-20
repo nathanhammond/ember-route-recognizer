@@ -1,4 +1,9 @@
-import { StaticSegment, EpsilonSegment, DynamicSegment, GlobNode } from 'ember-route-recognizer/-private/segment-trie-node';
+import SegmentTrieNode from 'ember-route-recognizer/-private/segment-trie/segment-trie-node';
+import DynamicSegment from 'ember-route-recognizer/-private/segment-trie/dynamic-segment';
+import EpsilonSegment from 'ember-route-recognizer/-private/segment-trie/epsilon-segment';
+import GlobNode from 'ember-route-recognizer/-private/segment-trie/glob-node';
+import StaticSegment from 'ember-route-recognizer/-private/segment-trie/static-segment';
+
 import { module, test } from 'qunit';
 
 module('Unit | SegmentTrieNode');
