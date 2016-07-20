@@ -1,6 +1,6 @@
-// This function adds all of the epsilon segments to current set.
+// This function adds all of the eligible epsilon segments to the current set.
 function descendantEpsilonSegments(set) {
-  // This is effectively recursive because set gets mutated.
+  // This is effectively recursive because `set` gets mutated.
   for (var i = 0; i < set.length; i++) {
     set = set.concat(set[i].children.epsilonSegments);
   }
@@ -8,7 +8,7 @@ function descendantEpsilonSegments(set) {
   return set;
 }
 
-// This function is invoked on consumption of the last consumed segment.
+// This function is invoked upon consumption of the last segment.
 function undefinedSegment(set) {
   return set.filter(function(node) {
     return node.handler;
@@ -20,8 +20,8 @@ export default function NFATransition(set, segment) {
   var nextSet = [];
 
   if (segment !== undefined) {
-
     // Iterating over the current set, the next set is always comprised of:
+
     for (var i = 0; i < set.length; i++) {
 
       // 1. All static segments matching this segment value.
@@ -40,11 +40,12 @@ export default function NFATransition(set, segment) {
     nextSet = descendantEpsilonSegments(nextSet);
 
   } else {
+    // Alternatively we're done before we even start.
 
-    // 5. All "recursive" epsilon segments of this current set.
+    // 1. Add all "recursive" epsilon segments of this current set.
     nextSet = descendantEpsilonSegments(set);
 
-    // Handle the last segment by filtering for accepting states.
+    // 2. Handle this last segment by filtering for accepting states.
     nextSet = undefinedSegment(nextSet);
   }
 
