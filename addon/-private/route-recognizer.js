@@ -5,7 +5,7 @@ import transition from './nfa-transition';
 import { normalizePath } from './normalizer';
 
 function moreSpecific(a, b) {
-  for (var i = 0; i < a.length; i++) {
+  for (let i = 0; i < a.length; i++) {
     if (a.specificity[i] > b.specificity[i]) {
       return a;
     } else if (a.specificity[i] < b.specificity[i]) {
@@ -57,7 +57,7 @@ export default class RouteRecognizer {
     );
     let matches = deconstructing.exec(path);
 
-    for (var i = segments.length - 1; i >=0; i--) {
+    for (let i = segments.length - 1; i >=0; i--) {
       segmentTrieNode = segments[i];
       if (segmentTrieNode.handler) {
         handlers.unshift({
@@ -69,7 +69,12 @@ export default class RouteRecognizer {
       if (segmentTrieNode.type === 'dynamic' || segmentTrieNode.type === 'glob') {
         handlers[0].isDynamic = true;
         handlers[0].params[segmentTrieNode.value] = matches.pop();
+
+        if (segmentTrieNode.router.ENCODE_AND_DECODE_PATH_SEGMENTS && segmentTrieNode.type === 'dynamic') {
+          handlers[0].params[segmentTrieNode.value] = decodeURIComponent(handlers[0].params[segmentTrieNode.value]);
+        }
       }
+
     }
 
     specificity[2] = parseInt(specificity[2], 10);
@@ -83,7 +88,7 @@ export default class RouteRecognizer {
     let leaf = this.rootState;
 
     // Go through each passed in route and call the matcher with it.
-    for (var i = 0; i < routes.length; i++) {
+    for (let i = 0; i < routes.length; i++) {
       leaf = matcher.call(leaf, routes[i].path);
       leaf.to(routes[i].handler);
     }

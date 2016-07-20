@@ -802,9 +802,9 @@ encodedCharGenerationExpectations.forEach(function(expectation) {
   });
 
   test("When RouteRecognizer.ENCODE_AND_DECODE_PATH_SEGMENTS is false, does not encode dynamic segment for route '" + route + "' with params " + JSON.stringify(params), function(assert) {
-    RouteRecognizer.ENCODE_AND_DECODE_PATH_SEGMENTS = false;
+    router.ENCODE_AND_DECODE_PATH_SEGMENTS = false;
     assert.equal(router.generate(route, params), expectedUnencoded);
-    RouteRecognizer.ENCODE_AND_DECODE_PATH_SEGMENTS = true;
+    router.ENCODE_AND_DECODE_PATH_SEGMENTS = true;
   });
 });
 

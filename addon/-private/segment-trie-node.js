@@ -112,6 +112,8 @@ class SegmentTrieNode {
 
 /* Concrete implementations. */
 
+var escapeChars = /[\\^$.*+?()[\]{}|]/g;
+
 class StaticSegment extends SegmentTrieNode {
   constructor(router, value) {
     value = normalizePath(value);
@@ -120,7 +122,7 @@ class StaticSegment extends SegmentTrieNode {
   }
 
   get regex() {
-    return this.value;
+    return this.value.replace(escapeChars, '\\$&');
   }
 
   get score() {
@@ -203,7 +205,13 @@ class DynamicSegment extends SegmentTrieNode {
   }
 
   output(params) {
-    return '/' + params[this.value];
+    let value = params[this.value];
+
+    if (this.router.ENCODE_AND_DECODE_PATH_SEGMENTS) {
+      value = encodeURIComponent(value);
+    }
+
+    return '/' + value;
   }
 
   appendTo(parentNode) {
