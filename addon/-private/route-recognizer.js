@@ -7,7 +7,7 @@ import { bind, isArray } from './polyfills';
 import { normalizePath } from './normalizer';
 
 function moreSpecific(a, b) {
-  for (let i = 0; i < a.length; i++) {
+  for (let i = 0; i < a.specificity.length; i++) {
     if (a.specificity[i] > b.specificity[i]) {
       return a;
     } else if (a.specificity[i] < b.specificity[i]) {
@@ -35,15 +35,15 @@ export default class RouteRecognizer {
     this.names = {};
   }
 
-  _process(segmentTrieNode, path, queryParams) {
+  _process(segmentTrieNode, path, trailing, queryParams) {
     let handlers = new RecognizeResults(queryParams);
-    let specificity = [ 0, '', 0 ]; // [ segments, segmentType, handlers ]
+    let specificity = [ '0', 0, 0 ]; // [ segmentType, segments, handlers ]
     let segments = [];
 
     // Calculate specificity, get references in order.
     do {
-      specificity[0]++;
-      specificity[1] = segmentTrieNode.score + specificity[1];
+      specificity[0] = segmentTrieNode.score + specificity[0];
+      specificity[1]++;
       specificity[2] += !!segmentTrieNode.handler;
       segments.unshift(segmentTrieNode);
     } while (segmentTrieNode = segmentTrieNode.parent);
@@ -55,6 +55,7 @@ export default class RouteRecognizer {
         .filter((segmentTrieNode) => { return !(segmentTrieNode instanceof EpsilonSegment); })
         .map((segmentTrieNode) => { return segmentTrieNode.regex; })
         .join('/') +
+        (segments[segments.length - 1].type === 'glob' ? '' : '(?:/?)') +
       '$'
     );
     let matches = deconstructing.exec(path);
@@ -79,7 +80,7 @@ export default class RouteRecognizer {
 
     }
 
-    specificity[1] = parseInt(specificity[1], 10);
+    specificity[0] = parseInt(specificity[0], 10);
     handlers.specificity = specificity;
 
     return handlers;
@@ -291,10 +292,10 @@ export default class RouteRecognizer {
     }
 
     // Unroll this loop to prevent a branch.
-    let solution = this._process(nextSet[0], originalPath, queryParams);
+    let solution = this._process(nextSet[0], originalPath, trailing, queryParams);
     let current;
     for (let i = 1; i < nextSet.length; i++) {
-      current = this._process(nextSet[i], originalPath, queryParams);
+      current = this._process(nextSet[i], originalPath, trailing, queryParams);
       solution = moreSpecific(solution, current);
     }
 

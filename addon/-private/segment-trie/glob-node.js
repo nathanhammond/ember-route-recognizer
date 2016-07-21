@@ -11,7 +11,7 @@ class GlobNode extends SegmentTrieNode {
   }
 
   get regex() {
-    return '(.+)(?:/?)';
+    return '(.+)';
   }
 
   get score() {

@@ -7,7 +7,7 @@ class EpsilonSegment extends SegmentTrieNode {
   }
 
   get score() {
-    return '0';
+    return '';
   }
 
   appendTo(parentNode) {
