@@ -731,7 +731,7 @@ module("Route Generation", {
   setup: function() {
     router = new RouteRecognizer();
 
-    handlers = [ {}, {}, {}, {}, {}, {}, {} ];
+    handlers = [ { id: 0 }, { id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }, { id: 6 } ];
 
     router.add([{ path: "/", handler: {} }], { as: "index" });
     router.add([{ path: "/posts/:id", handler: handlers[0] }], { as: "post" });

@@ -40,7 +40,7 @@ export default class RouteRecognizer {
     let specificity = [ 0, '', 0 ]; // [ segments, segmentType, handlers ]
     let segments = [];
 
-    // Calculate specificty, get references in order.
+    // Calculate specificity, get references in order.
     do {
       specificity[0]++;
       specificity[1] = segmentTrieNode.score + specificity[1];
@@ -92,7 +92,7 @@ export default class RouteRecognizer {
     // Go through each passed in route and call the matcher with it.
     for (let i = 0; i < routes.length; i++) {
       leaf = matcher.call(leaf, routes[i].path);
-      leaf.to(routes[i].handler);
+      leaf = leaf.to(routes[i].handler);
     }
     leaf.name = options.as;
     this.names[options.as] = leaf;
@@ -220,6 +220,7 @@ export default class RouteRecognizer {
 
   recognize(path) {
     let trailing = '';
+    let originalPath = '';
 
     // Chop off the hash portion of the URL.
     let hashStart = path.indexOf('#');
@@ -237,7 +238,7 @@ export default class RouteRecognizer {
     }
 
     // Remove leading slashes as they're not matched.
-    path = path.replace(/^[\/]*/, '');
+    path = path.replace(/^[\/]/, '');
 
     // Find out if we have a trailing slash.
     if (path.charCodeAt(path.length - 1) === 47) {
@@ -245,7 +246,8 @@ export default class RouteRecognizer {
     }
 
     // Remove trailing slashes as they're not matched.
-    path = path.replace(/[\/]*$/, '');
+    path = path.replace(/[\/]$/, '');
+    originalPath = path + trailing;
 
     // Adjacent mid-route segments in a route definition
     // are treated as an empty-string static segment.
@@ -256,6 +258,7 @@ export default class RouteRecognizer {
       path = normalizePath(path);
     } else {
       path = decodeURI(path);
+      originalPath = decodeURI(originalPath);
     }
 
     // Get the list of segments.
@@ -288,12 +291,10 @@ export default class RouteRecognizer {
     }
 
     // Unroll this loop to prevent a branch.
-    let matchPath = nextSet[0].type === 'glob' ? path + trailing : path;
-    let solution = this._process(nextSet[0], matchPath, queryParams);
+    let solution = this._process(nextSet[0], originalPath, queryParams);
     let current;
     for (let i = 1; i < nextSet.length; i++) {
-      matchPath = nextSet[i].type === 'glob' ? path + trailing : path;
-      current = this._process(nextSet[i], path, queryParams);
+      current = this._process(nextSet[i], originalPath, queryParams);
       solution = moreSpecific(solution, current);
     }
 

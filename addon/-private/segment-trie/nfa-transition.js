@@ -19,6 +19,9 @@ function undefinedSegment(set) {
 export default function NFATransition(set, segment) {
   var nextSet = [];
 
+  // First step: If we have epsilon segments we need to add them to the current set.
+  set = descendantEpsilonSegments(set);
+
   if (segment !== undefined) {
     // Iterating over the current set, the next set is always comprised of:
 
@@ -36,17 +39,10 @@ export default function NFATransition(set, segment) {
       nextSet = nextSet.concat(set[i].children.globNodes);
     }
 
-    // 4. All "recursive" epsilon segments of this current set.
-    nextSet = descendantEpsilonSegments(nextSet);
-
   } else {
     // Alternatively we're done before we even start.
-
-    // 1. Add all "recursive" epsilon segments of this current set.
-    nextSet = descendantEpsilonSegments(set);
-
-    // 2. Handle this last segment by filtering for accepting states.
-    nextSet = undefinedSegment(nextSet);
+    // Handle this last segment by filtering for accepting states.
+    nextSet = undefinedSegment(set);
   }
 
   return nextSet;
