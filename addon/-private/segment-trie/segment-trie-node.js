@@ -1,31 +1,3 @@
-import { isArray } from '../polyfills';
-
-
-function serialize(element) {
-  var result = {};
-  var keys = Object.keys(element);
-
-  var recursiveKeys;
-  for (var i = 0; i < keys.length; i++) {
-    if (typeof element[keys[i]] === 'object' && !isArray(element[keys[i]])) {
-      // Handle hash of arrays of children.
-      if (Object.keys(element[keys[i]]).length) {
-        result[keys[i]] = serialize(element[keys[i]]);
-      }
-    } else {
-      // Handle arrays of children.
-      for (var j = 0; j < element[keys[i]].length; j++) {
-        if (!result[keys[i]]) {
-          result[keys[i]] = new Array(element[keys[i]].length);
-        }
-        result[keys[i]][j] = element[keys[i]][j].id;
-      }
-    }
-  }
-
-  return result;
-}
-
 class SegmentTrieNode {
   constructor(router, value) {
     this.router = router;
@@ -115,11 +87,6 @@ class SegmentTrieNode {
     // Set up parent reference.
     if (this.parent) {
       result.parent = this.parent.id;
-    }
-
-    var children = serialize(this.children);
-    if (Object.keys(children).length) {
-      result.children = children;
     }
 
     return result;
