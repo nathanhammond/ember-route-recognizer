@@ -30,9 +30,10 @@ function decodeQueryParamPart(part) {
 
 export default class RouteRecognizer {
   constructor() {
+    this.names = {};
+    this.nodes = [];
     this.ENCODE_AND_DECODE_PATH_SEGMENTS = RouteRecognizer.ENCODE_AND_DECODE_PATH_SEGMENTS;
     this.rootState = new EpsilonSegment(this);
-    this.names = {};
   }
 
   _process(segmentTrieNode, path, trailing, queryParams) {
@@ -92,8 +93,8 @@ export default class RouteRecognizer {
 
     // Go through each passed in route and call the matcher with it.
     for (let i = 0; i < routes.length; i++) {
-      leaf = matcher.call(leaf, routes[i].path);
-      leaf = leaf.to(routes[i].handler);
+      leaf = matcher('add').call(leaf, routes[i].path);
+      leaf = leaf.to(routes[i].handler, undefined, 'add');
     }
     leaf.name = options.as;
     this.names[options.as] = leaf;
@@ -185,8 +186,9 @@ export default class RouteRecognizer {
     return "?" + pairs.join("&");
   }
 
-  map(callback/*, addRouteCallback*/) {
-    callback(bind(matcher, this.rootState));
+  map(callback, addRouteCallback) {
+    this.addRouteCallback = addRouteCallback;
+    callback(bind(matcher('map'), this.rootState));
   }
 
   parseQueryString(queryString) {
@@ -302,7 +304,34 @@ export default class RouteRecognizer {
     return solution;
   }
 
-  toJSON() {}
+  toJSON() {
+    // Rebuild the names property as a series of ID references.
+    var names = {};
+    for (var x in this.names) {
+      if (!this.names.hasOwnProperty(x)) { return; }
+      var current = this.names[x];
+
+      while (current && !current.safe) {
+        current.safe = true;
+        current = current.parent;
+      }
+
+      names[x] = this.names[x].id;
+    }
+
+    // Could have unnecessary references.
+    for (var i = 0; i < this.nodes.length; i++) {
+      if (this.nodes[i] && !this.nodes[i].safe) {
+        this.nodes[i] = undefined;
+      }
+    }
+
+    return {
+      names: names,
+      rootState: this.rootState.id,
+      nodes: this.nodes
+    };
+  }
 }
 
 RouteRecognizer.ENCODE_AND_DECODE_PATH_SEGMENTS = true;

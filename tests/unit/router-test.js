@@ -1,5 +1,5 @@
 import RouteRecognizer from 'ember-route-recognizer/-private/route-recognizer';
-import { module, test } from 'qunit';
+import { module, test, skip } from 'qunit';
 
 var router;
 
@@ -188,7 +188,7 @@ test("support nested star route", function(assert) {
   });
 });
 
-test("calls a delegate whenever a new context is entered", function(assert) {
+skip("calls a delegate whenever a new context is entered", function(assert) {
   var passedArguments = [];
 
   router.delegate = {
@@ -212,7 +212,7 @@ test("calls a delegate whenever a new context is entered", function(assert) {
   matchesRoute(assert, "/posts", [{ handler: "application", params: {}, isDynamic: false }, { handler: "posts", params: {}, isDynamic: false }, { handler: "index", params: {}, isDynamic: false }]);
 });
 
-test("delegate can change added routes", function(assert) {
+skip("delegate can change added routes", function(assert) {
   router.delegate = {
     willAddRoute: function(context, route) {
       if (!context) { return route; }

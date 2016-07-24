@@ -17,41 +17,72 @@ function buildSegmentTrieNode(router, value) {
   }
 }
 
-function matcher(path, callback) {
-  var leaf = this;
-  path = path.replace(/^[\/]*/, '');
-  path = path.replace(/[\/]*$/, '');
+function matcher(source) {
+  return function matcher(path, callback) {
+    var leaf = this;
+    path = path.replace(/^[\/]*/, '');
+    path = path.replace(/[\/]*$/, '');
 
-  var segments;
-  if (path === '') {
-    // Gets an epsilon segment.
-    segments = [ undefined ];
-  } else {
-    segments = path.split('/');
-  }
+    var segments;
+    if (path === '') {
+      // Gets an epsilon segment.
+      segments = [ undefined ];
+    } else {
+      segments = path.split('/');
+    }
 
-  // As we're adding segments we need to track the current leaf.
-  for (var i = 0; i < segments.length; i++) {
-    segments[i] = buildSegmentTrieNode(this.router, segments[i]);
+    // As we're adding segments we need to track the current leaf.
+    for (var i = 0; i < segments.length; i++) {
+      segments[i] = buildSegmentTrieNode(this.router, segments[i]);
 
-    leaf = leaf.append(segments[i]);
-  }
+      leaf = leaf.append(segments[i]);
+    }
 
-  if (callback) {
-    // No handler, delegate back to the TrieNode's `to` method.
-    leaf.to(undefined, callback);
-  }
+    if (callback) {
+      // No handler, delegate back to the TrieNode's `to` method.
+      leaf.to(undefined, callback, source);
+    }
 
-  return leaf;
+    return leaf;
+  };
 }
 
 // So, this is sad, but we don't get circular references that do the right thing.
-SegmentTrieNode.prototype.to = function to(handler, callback) {
+SegmentTrieNode.prototype.to = function to(handler, callback, source) {
   this.handler = handler;
+
+  if (handler && this.router.addRouteCallback && source !== 'add') {
+    var routes = [];
+    var segmentTrieNode = this;
+    var prefix = '';
+
+    do {
+      // We've found a new handler, start building it up again.
+      if (segmentTrieNode.handler) {
+        routes.unshift({
+          path: '',
+          handler: segmentTrieNode.handler
+        });
+      }
+
+      switch (segmentTrieNode.type) {
+        case 'dynamic': prefix = '/:'; break;
+        case 'glob': prefix = '/*'; break;
+        default:
+        case 'static':
+        case 'epsilon':
+          prefix = '/';
+        break;
+      }
+      routes[0].path = prefix + segmentTrieNode.value + routes[0].path;
+    } while (segmentTrieNode = segmentTrieNode.parent);
+
+    this.router.addRouteCallback(this.router, routes);
+  }
 
   if (callback) {
     if (callback.length === 0) { throw new Error("You must have an argument in the function passed to `to`"); }
-    callback(bind(matcher, this));
+    callback(bind(matcher(source), this));
   }
 
   return this;
