@@ -1,8 +1,8 @@
 import SegmentTrieNode from './segment-trie-node';
 
 class GlobNode extends SegmentTrieNode {
-  constructor(router, value) {
-    super(router, value.substr(1));
+  constructor() {
+    super(...arguments);
     this.type = 'glob';
 
     // Glob nodes maintain a circular reference to themselves.

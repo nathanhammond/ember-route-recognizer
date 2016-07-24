@@ -11,9 +11,9 @@ function buildSegmentTrieNode(router, value) {
     return new EpsilonSegment(...arguments);
   }
   switch (value.charCodeAt(0)) {
-    case 58: return new DynamicSegment(...arguments); // : => 58
-    case 42: return new GlobNode(...arguments); // * => 42
-    default: return new StaticSegment(...arguments);
+    case 58: return new DynamicSegment(router, value.substr(1)); // : => 58
+    case 42: return new GlobNode(router, value.substr(1)); // * => 42
+    default: return new StaticSegment(router, value);
   }
 }
 

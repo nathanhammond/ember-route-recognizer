@@ -1,7 +1,7 @@
 import RouteRecognizer from 'ember-route-recognizer/-private/route-recognizer';
 import { module, test, skip } from 'qunit';
 
-var router;
+var router = {};
 
 function resultsMatch(assert, results, array, queryParams) {
   assert.deepEqual(results.slice(), array);
@@ -12,7 +12,12 @@ function resultsMatch(assert, results, array, queryParams) {
 
 module("The match DSL", {
   setup: function() {
-    router = new RouteRecognizer();
+    router.map = function() {
+      var original = new RouteRecognizer();
+      original.map(...arguments);
+      var serialized = JSON.parse(JSON.stringify(original));
+      router = new RouteRecognizer(serialized);
+    };
   }
 });
 

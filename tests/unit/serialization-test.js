@@ -9,5 +9,5 @@ test('Hello world.', function(assert) {
     match('/helloworld').to('helloworld');
   });
   router.names['helloworld'] = router.nodes[1];
-  assert.equal(JSON.stringify(router), '{"names":{"helloworld":2},"rootState":1,"nodes":[{"id":1,"type":"epsilon"},{"id":2,"type":"static","value":"helloworld","handler":"helloworld","parent":1}]}');
+  assert.equal(JSON.stringify(router), '{"names":{"helloworld":1},"nodes":[{"id":0,"type":"epsilon"},{"id":1,"type":"static","value":"helloworld","handler":"helloworld","parent":0}]}');
 });

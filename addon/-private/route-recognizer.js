@@ -1,4 +1,8 @@
+import DynamicSegment from './segment-trie/dynamic-segment';
 import EpsilonSegment from './segment-trie/epsilon-segment';
+import GlobNode from './segment-trie/glob-node';
+import StaticSegment from './segment-trie/static-segment';
+
 import transition from './segment-trie/nfa-transition';
 import { matcher } from './dsl';
 
@@ -29,11 +33,39 @@ function decodeQueryParamPart(part) {
 }
 
 export default class RouteRecognizer {
-  constructor() {
+  constructor(serialized) {
     this.names = {};
     this.nodes = [];
     this.ENCODE_AND_DECODE_PATH_SEGMENTS = RouteRecognizer.ENCODE_AND_DECODE_PATH_SEGMENTS;
     this.rootState = new EpsilonSegment(this);
+
+    if (serialized) {
+      this.nodes = new Array(serialized.nodes.length);
+      this.nodes[0] = this.rootState;
+
+      var constructorLookup = {
+        "dynamic": DynamicSegment,
+        "epsilon": EpsilonSegment,
+        "glob": GlobNode,
+        "static": StaticSegment
+      };
+
+      // Skip `rootState`.
+      for (var i = 1; i < serialized.nodes.length; i++) {
+        if (!serialized.nodes[i]) { continue; }
+
+        this.nodes[i] = new constructorLookup[serialized.nodes[i].type](this, serialized.nodes[i].value, serialized.nodes[i].handler);
+
+        // Parent is guaranteed to exist before the child.
+        this.nodes[i].appendTo(this.nodes[serialized.nodes[i].parent]);
+      }
+
+      // Map over to get the reference from the ID.
+      for (var x in serialized.names) {
+        if (!serialized.names.hasOwnProperty(x)) { return; }
+        this.names[x] = this.nodes[serialized.names[x]];
+      }
+    }
   }
 
   _process(segmentTrieNode, path, trailing, queryParams) {
@@ -309,26 +341,11 @@ export default class RouteRecognizer {
     var names = {};
     for (var x in this.names) {
       if (!this.names.hasOwnProperty(x)) { return; }
-      var current = this.names[x];
-
-      while (current && !current.safe) {
-        current.safe = true;
-        current = current.parent;
-      }
-
       names[x] = this.names[x].id;
-    }
-
-    // Could have unnecessary references.
-    for (var i = 0; i < this.nodes.length; i++) {
-      if (this.nodes[i] && !this.nodes[i].safe) {
-        this.nodes[i] = undefined;
-      }
     }
 
     return {
       names: names,
-      rootState: this.rootState.id,
       nodes: this.nodes
     };
   }

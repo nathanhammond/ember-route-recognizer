@@ -1,7 +1,7 @@
 class SegmentTrieNode {
-  constructor(router, value) {
+  constructor(router, value, handler) {
     this.router = router;
-    this.id = this.router.nodes.push(this);
+    this.id = this.router.nodes.push(this) - 1;
 
     this.parent = undefined;
     this.haystack = undefined;
@@ -14,7 +14,7 @@ class SegmentTrieNode {
 
     this.name = undefined;
     this.type = undefined;
-    this.handler = undefined;
+    this.handler = handler;
     this.value = value;
   }
 

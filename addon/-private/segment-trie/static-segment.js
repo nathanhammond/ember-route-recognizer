@@ -4,9 +4,9 @@ import { normalizePath } from '../normalizer';
 var escapeChars = /[\\^$.*+?()[\]{}|]/g;
 
 class StaticSegment extends SegmentTrieNode {
-  constructor(router, value) {
+  constructor(router, value, handler) {
     value = normalizePath(value);
-    super(router, value);
+    super(router, value, handler);
     this.type = 'static';
   }
 
