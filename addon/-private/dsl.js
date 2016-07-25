@@ -51,6 +51,13 @@ function matcher(source) {
 SegmentTrieNode.prototype.to = function to(handler, callback, source) {
   this.handler = handler;
 
+  var targetNode = this._existingOrSelf();
+  if (targetNode !== this) {
+    this.haystack = this.haystack.splice(this.haystack.indexOf(this), 1);
+    this.router.nodes[this.id] = undefined;
+    return targetNode;
+  }
+
   if (handler && this.router.addRouteCallback && source !== 'add') {
     var routes = [];
     var segmentTrieNode = this;
