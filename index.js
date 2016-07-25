@@ -31,10 +31,11 @@ module.exports = {
     // Get router.js
     var originalRouterTree = stew.find(tree, '*/router.js');
     originalRouterTree = stew.rename(originalRouterTree, 'router.js', 'router.original.js');
-    // originalRouterTree = stew.map(originalRouterTree, '*/router.original.js', function(content) {
-    //   content = header + content;
-    //   return content;
-    // });
+    originalRouterTree = stew.map(originalRouterTree, '*/router.original.js', function(content) {
+      content = content.replace(/import routerSetup.*/g, '');
+      content = content.replace(/extend\(routerSetup.*\{/g, 'extend({');
+      return content;
+    });
 
     var modifiedRouterTree = stew.map(tree, '*/router.js', function(content) {
       // Prepend the import for the new route-recognizer.
@@ -53,7 +54,8 @@ module.exports = {
 
           // Find `Router.extend` and its arguments.
           if (path.value.property.name === 'extend' && path.value.object.property.name === 'Router') {
-            var extendObject = path.parentPath.value.arguments[0];
+            var args = path.parentPath.value.arguments;
+            var extendObject = args[args.length - 1];
             extendObject.properties = extendObject.properties.concat(patch);
           }
 
