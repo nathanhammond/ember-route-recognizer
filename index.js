@@ -120,6 +120,7 @@ module.exports = {
       footer = footer.replace('dummy/router.original', config.modulePrefix + '/router.original')
       fs.writeFileSync('precompile.js', content + footer, 'utf8');
       serialized = require(path.join(process.cwd(), '/precompile'));
+      fs.unlink('precompile.js')
       return serialized;
     });
     precompile = stew.rename(precompile, 'precompile.js', 'precompile.json');
