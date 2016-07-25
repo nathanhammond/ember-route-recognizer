@@ -68,13 +68,18 @@ SegmentTrieNode.prototype.to = function to(handler, callback, source) {
       switch (segmentTrieNode.type) {
         case 'dynamic': prefix = '/:'; break;
         case 'glob': prefix = '/*'; break;
+        case 'epsilon': prefix = ''; break;
         default:
         case 'static':
-        case 'epsilon':
           prefix = '/';
         break;
       }
-      routes[0].path = prefix + segmentTrieNode.value + routes[0].path;
+      if (segmentTrieNode.type === 'epsilon' && routes[0].path === '') {
+        routes[0].path = '/';
+      }
+      if (segmentTrieNode.type !== 'epsilon') {
+        routes[0].path = prefix + segmentTrieNode.value + routes[0].path;
+      }
     } while (segmentTrieNode = segmentTrieNode.parent);
 
     this.router.addRouteCallback(this.router, routes);
