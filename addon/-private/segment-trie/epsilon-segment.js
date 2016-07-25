@@ -10,6 +10,9 @@ class EpsilonSegment extends SegmentTrieNode {
     return '';
   }
 
+  output() {
+    return '';
+  }
   appendTo(parentNode) {
     this.parent = parentNode;
     this.haystack = this.parent.children.epsilonSegments;
