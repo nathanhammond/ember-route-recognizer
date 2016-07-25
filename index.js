@@ -15,7 +15,7 @@ var serialized = 'var serialized = JSON.parse(\'{}\');\n'
 
 // Grab the first object inside of the patch.
 var patch;
-recast.visit(recast.parse(fs.readFileSync('lib/patch.js', 'utf8')), {
+recast.visit(recast.parse(fs.readFileSync(__dirname + '/lib/patch.js', 'utf8')), {
   visitObjectExpression: function(path) {
     patch = path.value.properties;
     return false;
@@ -85,11 +85,12 @@ module.exports = {
       destDir: '_precompile'
     });
 
+    var config;
     var configPath = path.join(this.app.name, 'config', 'environments', this.app.env + '.json');
     var configTree = this.app._configTree();
     configTree = stew.map(configTree, configPath, function(content) {
-      var config = JSON.parse(content);
-      var module = fs.readFileSync('lib/config-module.js', 'utf8');
+      config = JSON.parse(content);
+      var module = fs.readFileSync(__dirname + '/lib/config-module.js', 'utf8');
       module = module.replace(/\{\{MODULE_PREFIX\}\}/g, config.modulePrefix);
       module = module.replace(/\{\{CONFIG_JSON\}\}/g, content);
       return module;
@@ -103,24 +104,24 @@ module.exports = {
     var serialized;
     var precompile = new merge([loaderjsTree, emberTree, configTree, routerTree, addonTree]);
     precompile = concat(precompile, {
-      outputFile: '/dummy/precompile.js',
+      outputFile: 'precompile.js',
       headerFiles: ['_precompile/loader.js'],
       footerFiles: ['_precompile/ember.prod.js', '_precompile/config.js', '_precompile/router.js'],
       inputFiles: ['**/*']
     });
-    precompile = stew.map(precompile, '**/precompile.js', function(content) {
+    precompile = stew.map(precompile, 'precompile.js', function(content) {
       // Patch Ember.
       content = content.replace('_initRouterJs: function () {', '_initRouterJs: function (options, recognizer) {');
       content = content.replace('new _router4.default();', 'new _router4.default(options, recognizer);');
       content = content.replace('function Router(_options)', 'function Router(_options, recognizer)');
       content = content.replace(/this.recognizer[^;]*/, 'this.recognizer = new recognizer();');
 
-      var footer = fs.readFileSync('lib/precompile-footer.js', 'utf8');
+      var footer = fs.readFileSync(__dirname + '/lib/precompile-footer.js', 'utf8');
+      footer = footer.replace('dummy/router.original', config.modulePrefix + '/router.original')
       fs.writeFileSync('precompile.js', content + footer, 'utf8');
-      serialized = require('./precompile');
+      serialized = require(path.join(process.cwd(), '/precompile'));
       return serialized;
     });
-    precompile = stew.find(precompile, '*/precompile.js');
     precompile = stew.rename(precompile, 'precompile.js', 'precompile.json');
 
     var result = new merge([precompile, tree]);
