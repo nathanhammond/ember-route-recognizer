@@ -25,6 +25,14 @@ recast.visit(recast.parse(fs.readFileSync(__dirname + '/lib/patch.js', 'utf8')),
 module.exports = {
   name: 'ember-route-recognizer',
 
+  shouldIncludeChildAddon: function(childAddon) {
+    if (childAddon.name === 'loader.js') {
+      return false;
+    } else {
+      return this._super.shouldIncludeChildAddon.apply(this, arguments);
+    }
+  },
+
   preprocessTree: function(type, tree) {
     if (type !== 'js') { return tree; }
 
