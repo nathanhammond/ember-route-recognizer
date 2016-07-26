@@ -7,6 +7,6 @@ export function initialize() {
 }
 
 export default {
-  name: 'route-alias',
+  name: 'recognizer-route-alias',
   initialize: initialize
 };

@@ -138,7 +138,7 @@ module.exports = {
     var result = new merge([precompile, tree]);
 
     // Insert the route-alias application lookup.
-    result = stew.map(result, '**/initializers/route-alias.js', function(content) {
+    result = stew.map(result, '**/initializers/recognizer-route-alias.js', function(content) {
       content = content.replace('{}', JSON.stringify(serialized.lookup));
       return content;
     });
