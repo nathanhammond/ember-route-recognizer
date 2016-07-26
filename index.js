@@ -131,14 +131,20 @@ module.exports = {
       fs.writeFileSync('precompile.js', content + footer, 'utf8');
       serialized = require(path.join(process.cwd(), '/precompile'));
       fs.unlink('precompile.js')
-      return serialized;
+      return JSON.stringify(serialized.routes);
     });
     precompile = stew.rename(precompile, 'precompile.js', 'precompile.json');
 
     var result = new merge([precompile, tree]);
+
+    // Insert the route-alias application lookup.
+    result = stew.map(result, '**/initializers/route-alias.js', function(content) {
+      content = content.replace('{}', JSON.stringify(serialized.lookup));
+      return content;
+    });
     result = stew.rm(result, '*/router.original.js')
     result = stew.map(result, '*/router.js', function(content) {
-      content = content.replace("JSON.parse('{}')", "JSON.parse('"+serialized+"')");
+      content = content.replace("JSON.parse('{}')", "JSON.parse('"+serialized.routes+"')");
       return content;
     });
     return result;

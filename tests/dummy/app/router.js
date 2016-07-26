@@ -7,6 +7,7 @@ const Router = Ember.Router.extend({
 
 Router.map(function() {
   this.route('foo');
+  this.alias('alias', '/elsewhere', 'foo');
 });
 
 export default Router;
