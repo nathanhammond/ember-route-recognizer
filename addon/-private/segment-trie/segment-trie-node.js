@@ -42,7 +42,8 @@ class SegmentTrieNode {
     return (
       this.type === node.type &&
       this.value === node.value &&
-      this.handler === node.handler
+      this.handler === node.handler &&
+      this.handler !== undefined
     );
   }
 
