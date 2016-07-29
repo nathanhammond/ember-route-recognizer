@@ -609,6 +609,21 @@ test("Handle star routes last when there are trailing `/` routes.", function(ass
   ]);
 });
 
+test("Handle double empty segments before single empty segments.", function(assert) {
+  var handler1 = { handler: 1 };
+  var handler2 = { handler: 2 };
+  var handler3 = { handler: 3 };
+  var router = new RouteRecognizer();
+
+  router.add([{ path: "/", handler: handler1 }, { path: "/", handler: handler2 }]);
+  router.add([{ path: "/", handler: handler3 }]);
+
+  resultsMatch(assert, router.recognize("/"), [
+    { handler: handler1, params: { }, isDynamic: false },
+    { handler: handler2, params: { }, isDynamic: false }
+  ]);
+});
+
 test("Handle `/` before globs when the route is empty.", function(assert) {
   var handler1 = { handler: 1 };
   var handler2 = { handler: 2 };
