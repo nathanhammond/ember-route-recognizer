@@ -43,13 +43,14 @@ class SegmentTrieNode {
       this.type === node.type &&
       this.value === node.value &&
       this.handler === node.handler &&
-      this.handler !== undefined
+      this.name === node.name
     );
   }
 
   _checkExisting() {
     for (let i = 0; i < this.haystack.length; i++) {
       if (this._equivalent(this.haystack[i])) {
+        this.haystack[i].collapsed = true;
         return this.haystack[i];
       }
     }

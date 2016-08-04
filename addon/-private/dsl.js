@@ -48,31 +48,43 @@ function matcher(source) {
 }
 
 // So, this is sad, but we don't get circular references that do the right thing.
-SegmentTrieNode.prototype.to = function to(handler, callback, source) {
-  this.handler = handler;
+SegmentTrieNode.prototype.to = function to(handler, callback, source, name) {
+  var segmentTrieNode = this;
+  var router = this.router;
 
-  var targetNode = this._existingOrSelf();
-  if (targetNode !== this) {
-    this.haystack = this.haystack.splice(this.haystack.indexOf(this), 1);
-    this.router.nodes[this.id] = undefined;
-    return targetNode;
+  /**
+    Since we allow both collapsing on insert *and* late-binding changes
+    it's possible that we did so too eagerly. Fix that just in time when
+    we recognize it occurring.
+   */
+  if (segmentTrieNode.collapsed && (segmentTrieNode.handler !== handler || segmentTrieNode.name !== name)) {
+    var value = segmentTrieNode.value;
+    if (segmentTrieNode.type === 'glob') { value = '*' + value; }
+    if (segmentTrieNode.type === 'dynamic') { value = ':' + value; }
+    var cloneNode = buildSegmentTrieNode(router, value);
+    cloneNode.parent = segmentTrieNode.parent;
+    segmentTrieNode.haystack.push(cloneNode);
+
+    segmentTrieNode = cloneNode;
   }
 
-  if (handler && this.router.addRouteCallback && source !== 'add') {
+  segmentTrieNode.handler = handler;
+
+  if (handler && router.addRouteCallback && source !== 'add') {
     var routes = [];
-    var segmentTrieNode = this;
+    var traverseNode = segmentTrieNode;
     var prefix = '';
 
     do {
       // We've found a new handler, start building it up again.
-      if (segmentTrieNode.handler) {
+      if (traverseNode.handler) {
         routes.unshift({
           path: '',
-          handler: segmentTrieNode.handler
+          handler: traverseNode.handler
         });
       }
 
-      switch (segmentTrieNode.type) {
+      switch (traverseNode.type) {
         case 'dynamic': prefix = '/:'; break;
         case 'glob': prefix = '/*'; break;
         case 'epsilon': prefix = ''; break;
@@ -81,23 +93,23 @@ SegmentTrieNode.prototype.to = function to(handler, callback, source) {
           prefix = '/';
         break;
       }
-      if (segmentTrieNode.type === 'epsilon' && routes[0].path === '') {
+      if (traverseNode.type === 'epsilon' && routes[0].path === '') {
         routes[0].path = '/';
       }
-      if (segmentTrieNode.type !== 'epsilon') {
-        routes[0].path = prefix + segmentTrieNode.value + routes[0].path;
+      if (traverseNode.type !== 'epsilon') {
+        routes[0].path = prefix + traverseNode.value + routes[0].path;
       }
-    } while (segmentTrieNode = segmentTrieNode.parent);
+    } while (traverseNode = traverseNode.parent);
 
-    this.router.addRouteCallback(this.router, routes);
+    router.addRouteCallback(router, routes);
   }
 
   if (callback) {
     if (callback.length === 0) { throw new Error("You must have an argument in the function passed to `to`"); }
-    callback(bind(matcher(source), this));
+    callback(bind(matcher(source), segmentTrieNode));
   }
 
-  return this;
+  return segmentTrieNode;
 };
 
 export { matcher };
