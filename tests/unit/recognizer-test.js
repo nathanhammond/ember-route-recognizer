@@ -903,3 +903,45 @@ test("Getting a handler for an invalid named route raises", function(assert) {
         router.handlersFor("nope");
     }, /There is no route named nope/);
 });
+
+// Re: https://github.com/emberjs/ember.js/issues/13960
+test("Matches the route with the longer static prefix with nesting", function(assert) {
+  var handler1 = { handler: 1 };
+  var handler2 = { handler: 2 };
+  var handler3 = { handler: 3 };
+  var router = new RouteRecognizer();
+
+  router.add([
+    { path: "/", handler: handler1 }, /* application route */
+    { path: "/", handler: handler1 }, /* posts route */
+    { path: ":post_id", handler: handler1 }
+  ]);
+  router.add([
+    { path: "/", handler: handler3 }, /* application route */
+    { path: "/team", handler: handler3 },
+    { path: ":user_slug", handler: handler3 }
+  ]);
+  router.add([
+    { path: "/", handler: handler2 }, /* application route */
+    { path: "/team", handler: handler2 },
+    { path: "/", handler: handler2 } /* index route */
+  ]);
+
+  resultsMatch(assert, router.recognize("/5"), [
+    { handler: handler1, params: { }, isDynamic: false },
+    { handler: handler1, params: { }, isDynamic: false },
+    { handler: handler1, params: { post_id: '5' }, isDynamic: true }
+  ]);
+
+  resultsMatch(assert, router.recognize("/team"), [
+    { handler: handler2, params: { }, isDynamic: false },
+    { handler: handler2, params: { }, isDynamic: false },
+    { handler: handler2, params: { }, isDynamic: false }
+  ]);
+
+  resultsMatch(assert, router.recognize("/team/eww_slugs"), [
+    { handler: handler3, params: { }, isDynamic: false },
+    { handler: handler3, params: { }, isDynamic: false },
+    { handler: handler3, params: { user_slug: 'eww_slugs' }, isDynamic: true }
+  ]);
+});
