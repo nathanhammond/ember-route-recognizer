@@ -48,7 +48,7 @@ function matcher(source) {
 }
 
 // So, this is sad, but we don't get circular references that do the right thing.
-SegmentTrieNode.prototype.to = function to(handler, callback, source, name) {
+SegmentTrieNode.prototype.to = function to(handler, callback, source) {
   var segmentTrieNode = this;
   var router = this.router;
 
@@ -57,7 +57,7 @@ SegmentTrieNode.prototype.to = function to(handler, callback, source, name) {
     it's possible that we did so too eagerly. Fix that just in time when
     we recognize it occurring.
    */
-  if (segmentTrieNode.collapsed && (segmentTrieNode.handler !== handler || segmentTrieNode.name !== name)) {
+  if (segmentTrieNode.collapsed && segmentTrieNode.handler !== handler) {
     var value = segmentTrieNode.value;
     if (segmentTrieNode.type === 'glob') { value = '*' + value; }
     if (segmentTrieNode.type === 'dynamic') { value = ':' + value; }

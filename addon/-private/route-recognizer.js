@@ -124,14 +124,12 @@ export default class RouteRecognizer {
     let leaf = this.rootState;
 
     // Go through each passed in route and call the matcher with it.
-    // Pass the name through on the final call.
-    let name;
     for (let i = 0; i < routes.length; i++) {
       leaf = matcher('add').call(leaf, routes[i].path);
-      if (i === routes.length - 1) { name = options.as; }
-      leaf = leaf.to(routes[i].handler, undefined, 'add', name);
+      leaf = leaf.to(routes[i].handler, undefined, 'add');
     }
-    this.names[name] = leaf;
+    leaf.name = options.as;
+    this.names[options.as] = leaf;
   }
 
   handlersFor(name) {
