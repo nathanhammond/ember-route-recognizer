@@ -70,6 +70,25 @@ SegmentTrieNode.prototype.to = function to(handler, callback, source) {
 
   segmentTrieNode.handler = handler;
 
+  /**
+    It's also possible that we're now making something which was previously
+    a different node now match. In that case we need to remove the current
+    node and collapse it to the previous.
+   */
+  if (segmentTrieNode.haystack) {
+    for (var i = 0; i < segmentTrieNode.haystack.length; i++) {
+      if (segmentTrieNode === segmentTrieNode.haystack[i]) {
+        continue;
+      }
+      if (segmentTrieNode._equivalent(segmentTrieNode.haystack[i])) {
+        router.nodes.pop();
+        // router.nodes[segmentTrieNode.id] = null;
+        segmentTrieNode = segmentTrieNode.haystack[i];
+        break;
+      }
+    }
+  }
+
   if (handler && router.addRouteCallback && source !== 'add') {
     var routes = [];
     var traverseNode = segmentTrieNode;

@@ -945,3 +945,19 @@ test("Matches the route with the longer static prefix with nesting", function(as
     { handler: handler3, params: { user_slug: 'eww_slugs' }, isDynamic: true }
   ]);
 });
+
+test("Compacts NFA for routes with duplicate late-binding handlers.", function(assert) {
+  var handler1 = { handler: 1 };
+  var handler2 = { handler: 2 };
+  var handler3 = { handler: 3 };
+  var router = new RouteRecognizer();
+
+  router.add([{ path: "/", handler: handler1 }], { as: 'index' });
+  router.add([{ path: "/", handler: handler1 }, { path: "/child", handler: handler2 }], { as: 'child' });
+  router.add([{ path: "/", handler: handler1 }, { path: "/child", handler: handler2 }, { path: "/grandchild", handler: handler3 }], { as: 'grandchild' });
+
+  var serialized = router.toJSON();
+
+  // Three plus the root node.
+  assert.equal(serialized.nodes.length, 4, "Properly deduplicates nodes.");
+});
