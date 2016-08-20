@@ -1,4 +1,5 @@
 import SegmentTrieNode from './segment-trie-node';
+import { encodePathSegment } from '../normalizer';
 
 class DynamicSegment extends SegmentTrieNode {
   constructor() {
@@ -18,7 +19,7 @@ class DynamicSegment extends SegmentTrieNode {
     let value = params[this.value];
 
     if (this.router.ENCODE_AND_DECODE_PATH_SEGMENTS) {
-      value = encodeURIComponent(value);
+      value = encodePathSegment(value);
     }
 
     return '/' + value;
