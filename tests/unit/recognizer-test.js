@@ -124,6 +124,15 @@ staticExpectations.forEach(function(expectation) {
   });
 });
 
+test("Escaping works for path length with trailing slashes.", function(assert) {
+  var handler = {};
+  var router = new RouteRecognizer();
+  router.add([{ path: "/foo/:query", handler: handler }]);
+
+  resultsMatch(assert, router.recognize("/foo/%e8%81%8c%e4%bd%8d"), [{ handler: handler, params: { query: '职位' }, isDynamic: true }]);
+  resultsMatch(assert, router.recognize("/foo/%e8%81%8c%e4%bd%8d/"), [{ handler: handler, params: { query: '职位' }, isDynamic: true }]);
+});
+
 test("A simple route with query params recognizes", function(assert) {
   var handler = {};
   var router = new RouteRecognizer();
