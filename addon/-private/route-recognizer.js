@@ -351,4 +351,5 @@ export default class RouteRecognizer {
   }
 }
 
+RouteRecognizer.VERSION = 'VERSION_STRING_PLACEHOLDER';
 RouteRecognizer.ENCODE_AND_DECODE_PATH_SEGMENTS = true;
