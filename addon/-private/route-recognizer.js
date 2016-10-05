@@ -9,6 +9,7 @@ import { matcher } from './dsl';
 import RecognizeResults from './recognize-results';
 import { bind, isArray } from './polyfills';
 import { normalizePath } from './normalizer';
+import Normalizer from './normalizer';
 
 function moreSpecific(a, b) {
   for (let i = 0; i < a.specificity.length; i++) {
@@ -351,5 +352,6 @@ export default class RouteRecognizer {
   }
 }
 
+RouteRecognizer.Normalizer = Normalizer;
 RouteRecognizer.VERSION = 'VERSION_STRING_PLACEHOLDER';
 RouteRecognizer.ENCODE_AND_DECODE_PATH_SEGMENTS = true;

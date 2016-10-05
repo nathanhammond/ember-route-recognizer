@@ -135,6 +135,8 @@ function encodePathSegment(str) {
   return encodeURIComponent(str).replace(PATH_SEGMENT_ENCODINGS, decodeURIComponent);
 }
 
+var Normalizer = { normalizeSegment, normalizePath, encodePathSegment };
+
 class DynamicSegment extends SegmentTrieNode {
   constructor() {
     super(...arguments);
@@ -802,6 +804,7 @@ class RouteRecognizer {
   }
 }
 
+RouteRecognizer.Normalizer = Normalizer;
 RouteRecognizer.VERSION = '0.0.0';
 RouteRecognizer.ENCODE_AND_DECODE_PATH_SEGMENTS = true;
 

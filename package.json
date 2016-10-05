@@ -9,7 +9,8 @@
   "scripts": {
     "build": "ember build",
     "start": "ember server",
-    "test": "ember try:each"
+    "test": "ember try:each",
+    "bench": "ember build && node ./bench/index.js"
   },
   "repository": {
     "type": "git",
@@ -38,6 +39,7 @@
     "broccoli-funnel": "^1.0.7",
     "broccoli-merge-trees": "^1.1.4",
     "broccoli-rollup": "^1.0.3",
+    "do-you-even-bench": "^1.0.2",
     "ember-cli": "2.6.3",
     "ember-cli-app-version": "^1.0.0",
     "ember-cli-dependency-checker": "^1.2.0",
@@ -53,6 +55,7 @@
     "ember-export-application-global": "^1.0.5",
     "ember-load-initializers": "^0.5.1",
     "ember-resolver": "^2.0.3",
+    "glob": "^7.1.0",
     "rollup-plugin-replace": "^1.1.1"
   },
   "keywords": [
