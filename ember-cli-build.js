@@ -6,23 +6,49 @@ var Funnel = require('broccoli-funnel');
 var MergeTrees = require('broccoli-merge-trees');
 var FileCreator = require('broccoli-file-creator');
 var replace = require('rollup-plugin-replace');
+var typescript = require('broccoli-typescript-compiler').typescript;
 
+// We use the dummy application build to output the `dist` we need.
 module.exports = function(defaults) {
-  var app = new EmberAddon(defaults, {
-    // Add options here
+  var app = new EmberAddon(defaults);
+
+  // Only use the dummy app for non-production builds.
+  var originalToTree = app.toTree;
+  app.toTree = function() {
+    if (this.env !== 'production') {
+      return originalToTree.apply(this, arguments);
+    }
+  };
+
+  // Because this will eventually adopt TypeScript we use `tsc` to do transpilation.
+  var typescriptVersion = typescript('addon/-private', {
+    annotation: "TypeScript to ES3 + modules.",
+    tsconfig: {
+      "compilerOptions": {
+        "allowJs": true,
+        "module": "es6",
+        "target": "es3",
+        "moduleResolution": "node",
+        "newLine": "lf",
+        "noEmitHelpers": false,
+        "sourceMap": false,
+        "outDir": "typescript"
+      },
+      files: [
+        "route-recognizer.js"
+      ]
+    }
   });
 
-  /*
-    This build file specifies the options for the dummy test app of this
-    addon, located in `/tests/dummy`
-    This build file does *not* influence how the addon or the app using it
-    behave. You most likely want to be modifying `./index.js` or app's build file
-  */
+  // TODO: Manually add in the helpers we need:
+  // Set `"noEmitHelpers": true` above.
+  // var __extends = require('tslib').__extends;
+  // __extends.toString();
 
-  var library = new Rollup('addon/-private', {
+  var rollupVersion = new Rollup(typescriptVersion, {
     annotation: 'route-recognizer.js',
     rollup: {
-      entry: 'route-recognizer.js',
+      entry: 'typescript/route-recognizer.js',
       plugins: [replace({
         VERSION_STRING_PLACEHOLDER: require('./package.json').version
       })],
@@ -47,5 +73,5 @@ module.exports = function(defaults) {
     annotation: 'dummy source map'
   });
 
-  return new MergeTrees([app.toTree(), library, map]);
+  return new MergeTrees([app.toTree(), rollupVersion, map].filter(Boolean));
 };

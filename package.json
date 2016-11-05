@@ -39,6 +39,7 @@
     "broccoli-funnel": "^1.0.7",
     "broccoli-merge-trees": "^1.1.4",
     "broccoli-rollup": "^1.0.3",
+    "broccoli-typescript-compiler": "^1.0.1",
     "do-you-even-bench": "^1.0.2",
     "ember-cli": "2.6.3",
     "ember-cli-app-version": "^1.0.0",
@@ -56,7 +57,8 @@
     "ember-load-initializers": "^0.5.1",
     "ember-resolver": "^2.0.3",
     "glob": "^7.1.0",
-    "rollup-plugin-replace": "^1.1.1"
+    "rollup-plugin-replace": "^1.1.1",
+    "tslib": "^1.0.0"
   },
   "keywords": [
     "ember-addon"
@@ -71,7 +73,8 @@
     "ember-cli-babel": "^5.1.6",
     "ember-route-alias": "^0.1.4",
     "loader.js": "^4.0.1",
-    "recast": "^0.11.10"
+    "recast": "^0.11.10",
+    "typescript": "^2.0.3"
   },
   "ember-addon": {
     "configPath": "tests/dummy/config",
