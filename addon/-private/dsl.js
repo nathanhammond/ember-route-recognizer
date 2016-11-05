@@ -8,7 +8,7 @@ import { bind } from './polyfills';
 
 function buildSegmentTrieNode(router, value) {
   if (value === undefined) {
-    return new EpsilonSegment(...arguments);
+    return new EpsilonSegment(router, value);
   }
   switch (value.charCodeAt(0)) {
     case 58: return new DynamicSegment(router, value.substr(1)); // : => 58
