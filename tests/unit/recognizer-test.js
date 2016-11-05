@@ -946,6 +946,81 @@ globGenerationValues.forEach(function(value) {
   });
 });
 
+test("Throws when generating dynamic routes with an empty string", function(assert) {
+  var router = new RouteRecognizer();
+  router.add([{ "path": "/posts", "handler": "posts" }, { "path": "/*secret/create", "handler": "create" }], { as: "create" });
+  router.add([{ "path": "/posts", "handler": "posts" }, { "path": "/:secret/edit", "handler": "edit" }], { as: "edit" });
+
+  assert.throws(function() {
+    router.generate("create", { secret: "" });
+  }, /You must provide a param `secret`./);
+  assert.throws(function() {
+    router.generate("edit", { secret: "" });
+  }, /You must provide a param `secret`./);
+});
+
+test("Fails reasonably when bad params passed to dynamic segment", function(assert) {
+  var router = new RouteRecognizer();
+  router.add([{ "path": "/posts", "handler": "posts" }, { "path": "/*secret/create", "handler": "create" }], { as: "create" });
+  router.add([{ "path": "/posts", "handler": "posts" }, { "path": "/:secret/edit", "handler": "edit" }], { as: "edit" });
+
+  assert.throws(function() {
+    router.generate("edit");
+  }, /You must pass an object as the second argument to `generate`./, "No argument passed.");
+
+  assert.throws(function() {
+    router.generate("edit", false);
+  }, /You must pass an object as the second argument to `generate`./, "Boolean passed.");
+
+  assert.throws(function() {
+    router.generate("edit", null);
+  }, /You must pass an object as the second argument to `generate`./, "`null` passed.");
+
+  assert.throws(function() {
+    router.generate("edit", "123");
+  }, /You must pass an object as the second argument to `generate`./, "String passed.");
+
+  assert.throws(function() {
+    router.generate("edit", new String("foo")); //jshint ignore:line
+  }, /You must provide param `secret` to `generate`./, "`new String()` passed.");
+
+  assert.throws(function() {
+    router.generate("edit", []);
+  }, /You must provide param `secret` to `generate`./, "Array passed.");
+
+  assert.throws(function() {
+    router.generate("edit", {});
+  }, /You must provide param `secret` to `generate`./, "Object without own property passed.");
+
+  assert.throws(function() {
+    router.generate("create");
+  }, /You must pass an object as the second argument to `generate`./, "No argument passed.");
+
+  assert.throws(function() {
+    router.generate("create", false);
+  }, /You must pass an object as the second argument to `generate`./, "Boolean passed.");
+
+  assert.throws(function() {
+    router.generate("create", null);
+  }, /You must pass an object as the second argument to `generate`./, "`null` passed.");
+
+  assert.throws(function() {
+    router.generate("create", "123");
+  }, /You must pass an object as the second argument to `generate`./, "String passed.");
+
+  assert.throws(function() {
+    router.generate("create", new String("foo")); //jshint ignore:line
+  }, /You must provide param `secret` to `generate`./, "`new String()` passed.");
+
+  assert.throws(function() {
+    router.generate("create", []);
+  }, /You must provide param `secret` to `generate`./, "Array passed.");
+
+  assert.throws(function() {
+    router.generate("create", {});
+  }, /You must provide param `secret` to `generate`./, "Object without own property passed.");
+});
+
 test("Parsing and generation results into the same input string", function(assert) {
   var query = "filter%20data=date";
   assert.equal(router.generateQueryString(router.parseQueryString(query)), '?' + query);

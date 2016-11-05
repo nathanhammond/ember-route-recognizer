@@ -1,4 +1,5 @@
 import SegmentTrieNode from './segment-trie-node';
+import getParam from '../get-param';
 
 class GlobNode extends SegmentTrieNode {
   constructor() {
@@ -19,7 +20,9 @@ class GlobNode extends SegmentTrieNode {
   }
 
   output(params) {
-    return '/' + params[this.value];
+    let value = getParam(params, this.value);
+
+    return '/' + value;
   }
 
   appendTo(parentNode) {
