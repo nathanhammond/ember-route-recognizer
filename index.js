@@ -34,6 +34,7 @@ module.exports = {
   },
 
   preprocessTree: function(type, tree) {
+    return tree;
     if (type !== 'js') { return tree; }
 
     // Get router.js
@@ -80,6 +81,7 @@ module.exports = {
   },
 
   postprocessTree: function(type, tree) {
+    return tree;
     if (type !== 'js') { return tree; }
 
     var addonTree = require('broccoli-babel-transpiler')(this.treeFor('addon'), getBabelOptions(this));
