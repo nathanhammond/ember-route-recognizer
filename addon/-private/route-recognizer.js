@@ -121,7 +121,6 @@ export default class RouteRecognizer {
   }
 
   add(routes, options) {
-    options = options || {};
     let leaf = this.rootState;
 
     // Go through each passed in route and call the matcher with it.
@@ -129,8 +128,20 @@ export default class RouteRecognizer {
       leaf = matcher('add').call(leaf, routes[i].path);
       leaf = leaf.to(routes[i].handler, undefined, 'add');
     }
-    leaf.name = options.as;
-    this.names[options.as] = leaf;
+
+    let name;
+    if (typeof options === "object" && options !== null && options.hasOwnProperty("as")) {
+      name = options.as;
+    }
+
+    if (name) {
+      if (this.names.hasOwnProperty(name)) {
+        throw new Error("You may not add a duplicate route named `" + name + "`.");
+      } else {
+        leaf.name = name;
+        this.names[name] = leaf;
+      }
+    }
   }
 
   handlersFor(name) {
